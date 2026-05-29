@@ -1,0 +1,2621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECON-98 // Swiss Army Knife Toolkit</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --neon-green: #00ff88;
+    --neon-cyan: #00e5ff;
+    --neon-red: #ff3366;
+    --neon-amber: #ffaa00;
+    --neon-purple: #bf00ff;
+    --bg-dark: #020810;
+    --bg-panel: #060e1a;
+    --bg-card: #0a1628;
+    --border-dim: #1a2d4a;
+    --border-bright: #00ff8844;
+    --text-primary: #c8e8ff;
+    --text-muted: #4a7a9b;
+    --text-dim: #2a4a6a;
+    --grid-line: #0a1828;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, #001a3320 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, #00ff8808 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, #00e5ff06 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .mono { font-family: 'Share Tech Mono', monospace; }
+  .orbitron { font-family: 'Orbitron', monospace; }
+
+  /* ── HEADER ── */
+  .header {
+    position: relative; z-index: 10;
+    background: linear-gradient(180deg, #020810 0%, #060e1a88 100%);
+    border-bottom: 1px solid var(--border-dim);
+    padding: 1.25rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.6rem; font-weight: 900;
+    color: var(--neon-green);
+    text-shadow: 0 0 20px var(--neon-green), 0 0 40px #00ff8844;
+    letter-spacing: 4px;
+  }
+  .logo-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; color: var(--text-muted);
+    letter-spacing: 6px; margin-top: 2px;
+  }
+  .status-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: #001a0e; border: 1px solid #00ff8830;
+    border-radius: 4px; padding: 6px 14px;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.72rem;
+    color: var(--neon-green);
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green);
+    animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* ── SEARCH BAR ── */
+  .search-section {
+    position: relative; z-index: 10;
+    padding: 2rem 2rem 1rem;
+    max-width: 900px; margin: 0 auto;
+  }
+  .search-wrapper {
+    display: flex; gap: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .search-wrapper:focus-within {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 20px #00ff8820, inset 0 0 20px #00ff8808;
+  }
+  .search-prefix {
+    display: flex; align-items: center;
+    padding: 0 1rem;
+    background: #0a1e10;
+    border-right: 1px solid var(--border-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem; color: var(--neon-green);
+    white-space: nowrap;
+  }
+  #targetInput {
+    flex: 1;
+    background: transparent;
+    border: none; outline: none;
+    padding: 1rem 1.25rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1rem; color: var(--text-primary);
+    caret-color: var(--neon-green);
+  }
+  #targetInput::placeholder { color: var(--text-dim); }
+  .scan-btn {
+    background: var(--neon-green);
+    color: var(--bg-dark);
+    border: none; cursor: pointer;
+    padding: 0 2rem;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem; font-weight: 700;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .scan-btn:hover { background: #00ffaa; box-shadow: 0 0 20px #00ff8860; }
+  .scan-btn:active { transform: scale(0.98); }
+  .scan-btn.loading {
+    background: #004422;
+    color: var(--neon-green);
+    cursor: not-allowed;
+  }
+
+  /* ── QUICK FILTERS ── */
+  .filter-bar {
+    position: relative; z-index: 10;
+    padding: 0.5rem 2rem;
+    max-width: 900px; margin: 0 auto;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .filter-chip {
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 3px;
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .filter-chip:hover, .filter-chip.active {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+    background: #001a2a;
+    box-shadow: 0 0 8px #00e5ff20;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main-layout {
+    position: relative; z-index: 5;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 200px);
+    padding: 1rem 2rem 2rem;
+    max-width: 1600px; margin: 0 auto;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    padding-right: 1.5rem;
+    border-right: 1px solid var(--border-dim);
+  }
+  .sidebar-section { margin-bottom: 1.5rem; }
+  .sidebar-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 4px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    padding: 0 0 8px;
+    border-bottom: 1px solid var(--border-dim);
+    margin-bottom: 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-radius: 4px;
+    font-size: 0.82rem; font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .nav-item:hover { background: #0a1628; color: var(--text-primary); }
+  .nav-item.active {
+    background: #001a10;
+    color: var(--neon-green);
+    border-left: 2px solid var(--neon-green);
+  }
+  .nav-item .nav-icon { width: 16px; text-align: center; font-size: 0.9rem; }
+  .nav-badge {
+    margin-left: auto;
+    background: #001a0e; border: 1px solid #00ff8830;
+    border-radius: 2px; padding: 1px 5px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; color: var(--neon-green);
+  }
+  .nav-badge.warn { background: #1a0a00; border-color: #ff6600; color: #ff6600; }
+  .nav-badge.info { background: #00101a; border-color: #00e5ff; color: #00e5ff; }
+
+  /* ── CONTENT AREA ── */
+  .content-area { padding-left: 1.5rem; }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: #080f1e;
+    border-bottom: 1px solid var(--border-dim);
+    cursor: pointer;
+  }
+  .panel-title {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 2px; color: var(--text-primary);
+  }
+  .panel-icon { font-size: 1rem; }
+  .panel-actions { display: flex; align-items: center; gap: 8px; }
+  .panel-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; letter-spacing: 2px;
+    padding: 2px 8px; border-radius: 2px;
+  }
+  .tag-green { background: #001a0e; border: 1px solid #00ff8840; color: var(--neon-green); }
+  .tag-cyan { background: #001018; border: 1px solid #00e5ff30; color: var(--neon-cyan); }
+  .tag-amber { background: #1a1000; border: 1px solid #ffaa0040; color: var(--neon-amber); }
+  .tag-red { background: #1a0010; border: 1px solid #ff336640; color: var(--neon-red); }
+  .tag-purple { background: #0e001a; border: 1px solid #bf00ff40; color: var(--neon-purple); }
+  .panel-toggle { color: var(--text-dim); font-size: 0.7rem; transition: transform 0.3s; }
+  .panel-toggle.open { transform: rotate(180deg); }
+  .panel-body { padding: 1.25rem; display: none; }
+  .panel-body.open { display: block; }
+
+  /* ── DATA TABLE ── */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem; letter-spacing: 3px;
+    color: var(--text-dim); text-transform: uppercase;
+    padding: 6px 10px; text-align: left;
+    border-bottom: 1px solid var(--border-dim);
+  }
+  .data-table td {
+    padding: 7px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; color: var(--text-primary);
+    border-bottom: 1px solid #0a1628;
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #0a1628; }
+  .val-green { color: var(--neon-green); }
+  .val-cyan { color: var(--neon-cyan); }
+  .val-amber { color: var(--neon-amber); }
+  .val-red { color: var(--neon-red); }
+  .val-purple { color: var(--neon-purple); }
+  .val-muted { color: var(--text-muted); }
+
+  /* ── COMMAND OUTPUT ── */
+  .cmd-output {
+    background: #020810;
+    border: 1px solid var(--border-dim);
+    border-radius: 4px;
+    padding: 1rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: #7aaa88;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+    line-height: 1.6;
+  }
+  .cmd-output .cmd-prompt { color: var(--neon-green); }
+  .cmd-output .cmd-info { color: var(--neon-cyan); }
+  .cmd-output .cmd-warn { color: var(--neon-amber); }
+  .cmd-output .cmd-error { color: var(--neon-red); }
+  .cmd-output .cmd-highlight { color: var(--neon-green); font-weight: bold; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar-wrap {
+    height: 3px; background: var(--border-dim);
+    border-radius: 2px; overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+    box-shadow: 0 0 8px var(--neon-green);
+    transition: width 0.5s ease;
+  }
+
+  /* ── SCORE BADGE ── */
+  .score-ring {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 60px; height: 60px; border-radius: 50%;
+    border: 3px solid var(--neon-green);
+    box-shadow: 0 0 20px #00ff8840;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem; font-weight: 900;
+    color: var(--neon-green);
+  }
+  .score-ring.warn { border-color: var(--neon-amber); box-shadow: 0 0 20px #ffaa0040; color: var(--neon-amber); }
+  .score-ring.danger { border-color: var(--neon-red); box-shadow: 0 0 20px #ff336640; color: var(--neon-red); }
+
+  /* ── EXTERNAL LINKS GRID ── */
+  .ext-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+  }
+  .ext-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-dim);
+    border-radius: 5px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: block;
+  }
+  .ext-card:hover {
+    border-color: var(--neon-cyan);
+    background: #001020;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px #00e5ff18;
+  }
+  .ext-card-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.62rem; font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--neon-cyan);
+    margin-bottom: 4px;
+  }
+  .ext-card-desc {
+    font-size: 0.7rem; color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .ext-card-url {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; color: var(--text-dim);
+    margin-top: 6px;
+  }
+  .ext-card-icon { font-size: 1.2rem; margin-bottom: 5px; }
+
+  /* ── INFO GRID ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+  .info-tile {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-dim);
+    border-radius: 5px; padding: 12px 14px;
+  }
+  .info-tile-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem; letter-spacing: 3px;
+    color: var(--text-dim); text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .info-tile-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem; font-weight: bold;
+    color: var(--text-primary);
+    word-break: break-all;
+  }
+
+  /* ── TERMINAL EFFECT ── */
+  @keyframes blink { 50% { opacity: 0; } }
+  .cursor { animation: blink 1s infinite; color: var(--neon-green); }
+
+  /* ── TABS ── */
+  .tab-bar {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border-dim);
+    margin-bottom: 1rem;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 8px 18px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; letter-spacing: 2px;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .tab:hover { color: var(--text-primary); }
+  .tab.active {
+    color: var(--neon-green);
+    border-bottom-color: var(--neon-green);
+  }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ── ALERT / NOTICE ── */
+  .alert {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px; border-radius: 4px;
+    font-size: 0.78rem; margin-bottom: 10px;
+  }
+  .alert-warn { background: #1a0e00; border: 1px solid #ffaa0040; color: var(--neon-amber); }
+  .alert-info { background: #00101a; border: 1px solid #00e5ff30; color: var(--neon-cyan); }
+  .alert-danger { background: #1a0008; border: 1px solid #ff336640; color: var(--neon-red); }
+  .alert-success { background: #001a0a; border: 1px solid #00ff8840; color: var(--neon-green); }
+  .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── LOADING ANIMATION ── */
+  .scanning-line {
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+    animation: scan-sweep 1.5s linear infinite;
+    display: none;
+  }
+  .scanning-line.active { display: block; }
+  @keyframes scan-sweep { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg-dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border-dim); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ── WATERMARK CORNERS ── */
+  .corner-tl, .corner-br {
+    position: fixed;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem; letter-spacing: 2px;
+    color: var(--text-dim);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .corner-tl { top: 8px; left: 8px; }
+  .corner-br { bottom: 8px; right: 8px; }
+
+  /* ── REPORT BTN ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 4px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 1px;
+    cursor: pointer; border: none; transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--neon-green); color: var(--bg-dark);
+    font-weight: bold;
+  }
+  .btn-primary:hover { background: #00ffaa; box-shadow: 0 0 16px #00ff8840; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--neon-green);
+    color: var(--neon-green);
+  }
+  .btn-outline:hover { background: #001a0e; }
+  .btn-cyan { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+  .btn-cyan:hover { background: #001020; }
+  .btn-sm { padding: 4px 10px; font-size: 0.65rem; }
+
+  /* ── COPY BTN ── */
+  .copy-btn {
+    background: none; border: 1px solid var(--border-dim);
+    color: var(--text-dim); border-radius: 3px;
+    padding: 3px 8px; font-size: 0.65rem;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .copy-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
+  /* ── PORT STATUS ── */
+  .port-open { color: var(--neon-green); }
+  .port-filtered { color: var(--neon-amber); }
+  .port-closed { color: var(--neon-red); }
+
+  /* ── THREAT METER ── */
+  .threat-bar {
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg, var(--neon-green), var(--neon-amber), var(--neon-red));
+    position: relative; margin: 6px 0;
+  }
+  .threat-indicator {
+    position: absolute; top: -4px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: white; border: 2px solid var(--bg-dark);
+    box-shadow: 0 0 8px rgba(255,255,255,0.5);
+    transform: translateX(-50%);
+    transition: left 0.5s ease;
+  }
+
+  /* ── WELCOME STATE ── */
+  .welcome-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 4rem 2rem;
+    text-align: center;
+  }
+  .welcome-logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 3.5rem; font-weight: 900;
+    color: var(--neon-green);
+    text-shadow: 0 0 40px #00ff8860, 0 0 80px #00ff8820;
+    letter-spacing: 8px;
+    margin-bottom: 1rem;
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+  @keyframes glow-pulse {
+    0%,100% { text-shadow: 0 0 40px #00ff8860, 0 0 80px #00ff8820; }
+    50% { text-shadow: 0 0 60px #00ff88a0, 0 0 120px #00ff8840; }
+  }
+  .welcome-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem; color: var(--text-muted);
+    letter-spacing: 4px; margin-bottom: 3rem;
+  }
+  .feature-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 8px; max-width: 800px; margin: 0 auto;
+  }
+  .feature-chip {
+    background: var(--bg-card); border: 1px solid var(--border-dim);
+    border-radius: 4px; padding: 8px 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; color: var(--text-muted);
+    text-align: center;
+  }
+  .feature-chip span { display: block; margin-bottom: 3px; font-size: 1rem; }
+
+  /* Responsive */
+  @media(max-width: 900px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: none; border-bottom: 1px solid var(--border-dim); padding-right: 0; padding-bottom: 1rem; margin-bottom: 1rem; }
+    .content-area { padding-left: 0; }
+    .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    .ext-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  }
+
+  .typewriter { overflow: hidden; white-space: nowrap; border-right: 2px solid var(--neon-green); animation: typing 2s steps(40), blink-border 0.75s step-end infinite; }
+  @keyframes typing { from { width: 0; } to { width: 100%; } }
+  @keyframes blink-border { 0%,100% { border-color: var(--neon-green); } 50% { border-color: transparent; } }
+
+  .shimmer {
+    background: linear-gradient(90deg, var(--bg-card) 25%, #0d2040 50%, var(--bg-card) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
+</head>
+<body>
+
+<div class="corner-tl">RECON-98 v1.0 // AUTHORIZED USE ONLY</div>
+<div class="corner-br">CLIENT-SIDE // NO DATA STORED</div>
+
+<!-- HEADER -->
+<header class="header">
+  <div>
+    <div class="logo-text">⬡ RECON-98</div>
+    <div class="logo-sub">SWISS ARMY KNIFE // DOMAIN INTELLIGENCE TOOLKIT</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      <span id="systemStatus">SYSTEM READY</span>
+    </div>
+    <button class="btn btn-outline btn-sm" onclick="exportReport()">⬇ EXPORT</button>
+  </div>
+</header>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-wrapper">
+    <div class="search-prefix">▶ TARGET:</div>
+    <input type="text" id="targetInput" placeholder="example.com  |  192.168.1.1  |  https://example.com" />
+    <button class="scan-btn" id="scanBtn" onclick="startRecon()">⬡ INITIALIZE SCAN</button>
+  </div>
+  <div class="scanning-line" id="scanningLine"></div>
+  <div style="margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
+    <span style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--text-dim);">
+      ⚠ AUTHORIZED USE ONLY — Only scan domains/IPs you own or have explicit permission to test
+    </span>
+    <span id="scanTimer" style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--text-muted);"></span>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-chip active" data-filter="all" onclick="setFilter(this,'all')">ALL MODULES</div>
+  <div class="filter-chip" data-filter="network" onclick="setFilter(this,'network')">NETWORK</div>
+  <div class="filter-chip" data-filter="dns" onclick="setFilter(this,'dns')">DNS / DOMAINS</div>
+  <div class="filter-chip" data-filter="web" onclick="setFilter(this,'web')">WEB / SECURITY</div>
+  <div class="filter-chip" data-filter="threat" onclick="setFilter(this,'threat')">THREAT INTEL</div>
+  <div class="filter-chip" data-filter="external" onclick="setFilter(this,'external')">EXTERNAL TOOLS</div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">SCAN OVERVIEW</div>
+      <div id="sidebarTarget" style="font-family:'Share Tech Mono',monospace; font-size:0.72rem; color:var(--text-muted); padding:6px 10px; background:var(--bg-card); border-radius:4px; border:1px solid var(--border-dim); margin-bottom:8px; word-break:break-all;">
+        — awaiting target —
+      </div>
+      <div id="overallScore" style="display:none;">
+        <div style="display:flex;align-items:center;gap:12px; padding:10px;">
+          <div class="score-ring" id="scoreRing">—</div>
+          <div>
+            <div style="font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:var(--text-dim); letter-spacing:2px;">RISK SCORE</div>
+            <div id="scoreLabel" style="font-size:0.85rem; font-weight:600; color:var(--neon-green);">CALCULATING</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">MODULE STATUS</div>
+      <nav id="moduleNav">
+        <div class="nav-item active" onclick="scrollToPanel('panel-ping')">
+          <span class="nav-icon">⬡</span> Ping & Connectivity
+          <span class="nav-badge" id="nav-ping">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-ip')">
+          <span class="nav-icon">◈</span> IP Information
+          <span class="nav-badge info" id="nav-ip">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-ports')">
+          <span class="nav-icon">▣</span> Port Scan (Nmap)
+          <span class="nav-badge warn" id="nav-ports">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-dns')">
+          <span class="nav-icon">◉</span> DNS Records
+          <span class="nav-badge" id="nav-dns">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-subdomains')">
+          <span class="nav-icon">⬟</span> Subdomains
+          <span class="nav-badge" id="nav-subs">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-ssl')">
+          <span class="nav-icon">🔒</span> SSL / TLS
+          <span class="nav-badge" id="nav-ssl">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-headers')">
+          <span class="nav-icon">▦</span> HTTP Headers
+          <span class="nav-badge" id="nav-headers">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-whois')">
+          <span class="nav-icon">◧</span> WHOIS / Domain
+          <span class="nav-badge" id="nav-whois">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-tech')">
+          <span class="nav-icon">⚙</span> Tech Stack
+          <span class="nav-badge" id="nav-tech">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-threats')">
+          <span class="nav-icon">⚠</span> Threat Intel
+          <span class="nav-badge warn" id="nav-threats">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-email')">
+          <span class="nav-icon">✉</span> Mail Config
+          <span class="nav-badge" id="nav-email">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-crawl')">
+          <span class="nav-icon">🕷</span> Crawl / Paths
+          <span class="nav-badge" id="nav-crawl">—</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-webcheck')">
+          <span class="nav-icon">🌐</span> Web-Check Modules
+          <span class="nav-badge info" id="nav-wc">31</span>
+        </div>
+        <div class="nav-item" onclick="scrollToPanel('panel-external')">
+          <span class="nav-icon">🔗</span> External Tools
+          <span class="nav-badge info" id="nav-ext">28</span>
+        </div>
+      </nav>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">QUICK ACTIONS</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">
+        <button class="btn btn-outline btn-sm" onclick="expandAll()" style="width:100%;justify-content:center;">▼ EXPAND ALL</button>
+        <button class="btn btn-outline btn-cyan btn-sm" onclick="collapseAll()" style="width:100%;justify-content:center;">▲ COLLAPSE ALL</button>
+        <button class="btn btn-outline btn-sm" style="border-color:#ffaa00;color:#ffaa00;width:100%;justify-content:center;" onclick="copyAllResults()">⧉ COPY RESULTS</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content-area" id="contentArea">
+
+    <!-- WELCOME STATE -->
+    <div id="welcomeState">
+      <div class="welcome-state">
+        <div class="welcome-logo">RECON-X</div>
+        <div class="welcome-sub">DOMAIN INTELLIGENCE // NETWORK RECON // THREAT ANALYSIS</div>
+        <div style="max-width:600px; color:var(--text-muted); font-size:0.88rem; line-height:1.7; margin-bottom:2.5rem; text-align:center;">
+          Enter a domain, IP address, or URL above to launch a comprehensive reconnaissance scan.<br>
+          This toolkit generates <strong style="color:var(--neon-cyan)">direct command references, deep-link outputs,</strong> and
+          <strong style="color:var(--neon-green)">28+ integrated external tool links</strong> — all in one place.
+        </div>
+        <div class="feature-grid">
+          <div class="feature-chip"><span>⬡</span>PING & HOPS</div>
+          <div class="feature-chip"><span>▣</span>PORT SCAN</div>
+          <div class="feature-chip"><span>◉</span>DNS RECORDS</div>
+          <div class="feature-chip"><span>⬟</span>SUBDOMAINS</div>
+          <div class="feature-chip"><span>🔒</span>SSL / TLS</div>
+          <div class="feature-chip"><span>▦</span>HTTP HEADERS</div>
+          <div class="feature-chip"><span>⚠</span>THREAT INTEL</div>
+          <div class="feature-chip"><span>⚙</span>TECH STACK</div>
+          <div class="feature-chip"><span>✉</span>MAIL CONFIG</div>
+          <div class="feature-chip"><span>🌐</span>WEB-CHECK</div>
+          <div class="feature-chip"><span>🕷</span>CRAWL PATHS</div>
+          <div class="feature-chip"><span>🔗</span>28 TOOLS</div>
+        </div>
+        <div style="margin-top:2.5rem; padding:12px 20px; background:var(--bg-card); border:1px solid #ffaa0030; border-radius:5px; max-width:550px;">
+          <div class="alert-warn alert" style="margin:0;">
+            <span class="alert-icon">⚠</span>
+            <span>This toolkit is for <strong>authorized penetration testing and security research only</strong>. Always obtain permission before scanning any target. Unauthorized scanning may be illegal.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS STATE (hidden until scan) -->
+    <div id="resultsState" style="display:none;">
+
+      <!-- ─────────────── PING & CONNECTIVITY ─────────────── -->
+      <div class="panel" id="panel-ping" data-category="network">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title">
+            <span class="panel-icon">⬡</span> PING & CONNECTIVITY
+          </div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-green" id="pingStatus">CHECKING</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="info-grid" id="pingGrid"></div>
+          <div class="cmd-output" id="pingOutput">Initializing ping sequence...</div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="copy-btn" onclick="copyText('pingOutput')">⧉ COPY OUTPUT</button>
+            <span style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--text-dim); align-self:center;">
+              CMD: <span style="color:var(--neon-amber);" id="pingCmd"></span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── IP INFORMATION ─────────────── -->
+      <div class="panel" id="panel-ip" data-category="network">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">◈</span> IP ADDRESS & GEOLOCATION</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-cyan">PASSIVE</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="info-grid" id="ipGrid"></div>
+          <div style="margin-top:10px;">
+            <div style="font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:var(--text-dim); margin-bottom:6px; letter-spacing:2px;">RELATED LOOKUPS</div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;" id="ipLinks"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── PORT SCAN ─────────────── -->
+      <div class="panel" id="panel-ports" data-category="network">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">▣</span> PORT SCAN & SERVICE ENUMERATION</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-amber">ACTIVE SCAN</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-ports-open')">OPEN PORTS</div>
+            <div class="tab" onclick="switchTab(this,'tab-ports-services')">SERVICES</div>
+            <div class="tab" onclick="switchTab(this,'tab-ports-versions')">VERSIONS</div>
+            <div class="tab" onclick="switchTab(this,'tab-ports-nmap')">NMAP COMMANDS</div>
+          </div>
+          <div class="tab-content active" id="tab-ports-open">
+            <table class="data-table" id="portsTable">
+              <thead><tr><th>PORT</th><th>STATE</th><th>SERVICE</th><th>PROTOCOL</th><th>BANNER</th></tr></thead>
+              <tbody id="portsBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-ports-services">
+            <table class="data-table" id="servicesTable">
+              <thead><tr><th>SERVICE</th><th>PORT</th><th>DESCRIPTION</th><th>RISK</th></tr></thead>
+              <tbody id="servicesBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-ports-versions">
+            <table class="data-table">
+              <thead><tr><th>SERVICE</th><th>VERSION</th><th>CVE CHECK</th><th>NOTES</th></tr></thead>
+              <tbody id="versionsBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-ports-nmap">
+            <div class="alert alert-info"><span class="alert-icon">ℹ</span> Run these Nmap commands locally for active scanning. This browser tool generates the command references.</div>
+            <div class="cmd-output" id="nmapCmds"></div>
+            <div style="margin-top:8px;"><button class="copy-btn" onclick="copyText('nmapCmds')">⧉ COPY COMMANDS</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── DNS RECORDS ─────────────── -->
+      <div class="panel" id="panel-dns" data-category="dns">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">◉</span> DNS RECORDS & SERVER INFO</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-cyan" id="dnsStatus">RESOLVING</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-dns-records')">RECORDS</div>
+            <div class="tab" onclick="switchTab(this,'tab-dns-server')">SERVER</div>
+            <div class="tab" onclick="switchTab(this,'tab-dns-dnssec')">DNSSEC</div>
+            <div class="tab" onclick="switchTab(this,'tab-dns-commands')">COMMANDS</div>
+          </div>
+          <div class="tab-content active" id="tab-dns-records">
+            <table class="data-table">
+              <thead><tr><th>TYPE</th><th>NAME</th><th>VALUE</th><th>TTL</th></tr></thead>
+              <tbody id="dnsBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-dns-server">
+            <div class="info-grid" id="dnsServerGrid"></div>
+          </div>
+          <div class="tab-content" id="tab-dns-dnssec">
+            <div id="dnssecInfo" class="cmd-output"></div>
+          </div>
+          <div class="tab-content" id="tab-dns-commands">
+            <div class="cmd-output" id="dnsCmds"></div>
+            <div style="margin-top:8px;"><button class="copy-btn" onclick="copyText('dnsCmds')">⧉ COPY COMMANDS</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── SUBDOMAINS ─────────────── -->
+      <div class="panel" id="panel-subdomains" data-category="dns">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">⬟</span> SUBDOMAINS & RELATED DOMAINS</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-amber">PASSIVE + ACTIVE</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="alert alert-info"><span class="alert-icon">ℹ</span>Passive enumeration via certificate transparency, DNS Dumpster, and OSINT sources. For active brute-forcing, use the commands below.</div>
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-subs-list')">DISCOVERED</div>
+            <div class="tab" onclick="switchTab(this,'tab-subs-tools')">ENUM TOOLS</div>
+          </div>
+          <div class="tab-content active" id="tab-subs-list">
+            <table class="data-table">
+              <thead><tr><th>SUBDOMAIN</th><th>IP</th><th>SOURCE</th><th>STATUS</th></tr></thead>
+              <tbody id="subdomainsBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-subs-tools">
+            <div class="cmd-output" id="subCmds"></div>
+            <div style="margin-top:8px;"><button class="copy-btn" onclick="copyText('subCmds')">⧉ COPY COMMANDS</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── SSL / TLS ─────────────── -->
+      <div class="panel" id="panel-ssl" data-category="web">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">🔒</span> SSL CERTIFICATE & TLS VERSION</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-green" id="sslStatus">CHECKING</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="info-grid" id="sslGrid"></div>
+          <div class="tab-bar" style="margin-top:12px;">
+            <div class="tab active" onclick="switchTab(this,'tab-ssl-cert')">CERTIFICATE</div>
+            <div class="tab" onclick="switchTab(this,'tab-ssl-tls')">TLS VERSIONS</div>
+            <div class="tab" onclick="switchTab(this,'tab-ssl-cmd')">TEST COMMANDS</div>
+          </div>
+          <div class="tab-content active" id="tab-ssl-cert">
+            <table class="data-table">
+              <thead><tr><th>FIELD</th><th>VALUE</th></tr></thead>
+              <tbody id="sslCertBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-ssl-tls">
+            <table class="data-table">
+              <thead><tr><th>VERSION</th><th>STATUS</th><th>RECOMMENDATION</th></tr></thead>
+              <tbody id="tlsBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-ssl-cmd">
+            <div class="cmd-output" id="sslCmds"></div>
+            <div style="margin-top:8px;"><button class="copy-btn" onclick="copyText('sslCmds')">⧉ COPY COMMANDS</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── HTTP HEADERS ─────────────── -->
+      <div class="panel" id="panel-headers" data-category="web">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">▦</span> HTTP HEADERS & SECURITY POSTURE</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-cyan">HTTP/S</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-hdr-all')">ALL HEADERS</div>
+            <div class="tab" onclick="switchTab(this,'tab-hdr-security')">SECURITY HEADERS</div>
+            <div class="tab" onclick="switchTab(this,'tab-hdr-hsts')">HSTS</div>
+            <div class="tab" onclick="switchTab(this,'tab-hdr-redirect')">REDIRECTS</div>
+          </div>
+          <div class="tab-content active" id="tab-hdr-all">
+            <table class="data-table">
+              <thead><tr><th>HEADER</th><th>VALUE</th><th>ANALYSIS</th></tr></thead>
+              <tbody id="headersBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-hdr-security">
+            <table class="data-table">
+              <thead><tr><th>SECURITY HEADER</th><th>PRESENT</th><th>VALUE</th><th>RISK</th></tr></thead>
+              <tbody id="secHeadersBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-hdr-hsts">
+            <div id="hstsInfo" class="cmd-output"></div>
+          </div>
+          <div class="tab-content" id="tab-hdr-redirect">
+            <div class="cmd-output" id="redirectInfo"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── WHOIS ─────────────── -->
+      <div class="panel" id="panel-whois" data-category="dns">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">◧</span> WHOIS & DOMAIN INFORMATION</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-purple">REGISTRATION</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="info-grid" id="whoisGrid"></div>
+          <div class="cmd-output" id="whoisOutput" style="margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <!-- ─────────────── TECH STACK ─────────────── -->
+      <div class="panel" id="panel-tech" data-category="web">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">⚙</span> TECH STACK & SITE FEATURES</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-cyan">FINGERPRINT</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-tech-stack')">TECH STACK</div>
+            <div class="tab" onclick="switchTab(this,'tab-tech-waf')">WAF / FIREWALL</div>
+            <div class="tab" onclick="switchTab(this,'tab-tech-features')">SITE FEATURES</div>
+            <div class="tab" onclick="switchTab(this,'tab-tech-carbon')">CARBON / RANK</div>
+          </div>
+          <div class="tab-content active" id="tab-tech-stack">
+            <table class="data-table">
+              <thead><tr><th>TECHNOLOGY</th><th>CATEGORY</th><th>CONFIDENCE</th><th>VERSION</th></tr></thead>
+              <tbody id="techBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-tech-waf">
+            <div id="wafInfo" class="cmd-output"></div>
+          </div>
+          <div class="tab-content" id="tab-tech-features">
+            <div id="featuresInfo" class="cmd-output"></div>
+          </div>
+          <div class="tab-content" id="tab-tech-carbon">
+            <div id="carbonInfo" class="cmd-output"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── THREAT INTEL ─────────────── -->
+      <div class="panel" id="panel-threats" data-category="threat">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">⚠</span> THREAT INTELLIGENCE & KNOWN THREATS</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-red" id="threatStatus">ANALYZING</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div style="display:flex;align-items:center;gap:16px; padding:10px 0; margin-bottom:12px;">
+            <div>
+              <div style="font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:var(--text-dim); letter-spacing:2px; margin-bottom:4px;">THREAT LEVEL</div>
+              <div class="threat-bar" style="width:250px;">
+                <div class="threat-indicator" id="threatIndicator" style="left:20%;"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;width:250px; font-family:'Share Tech Mono',monospace; font-size:0.6rem; color:var(--text-dim); margin-top:2px;">
+                <span>LOW</span><span>MEDIUM</span><span>HIGH</span>
+              </div>
+            </div>
+            <div class="score-ring" id="threatScore">—</div>
+          </div>
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-threat-bl')">BLOCKLISTS</div>
+            <div class="tab" onclick="switchTab(this,'tab-threat-known')">KNOWN THREATS</div>
+            <div class="tab" onclick="switchTab(this,'tab-threat-links')">INTEL LINKS</div>
+          </div>
+          <div class="tab-content active" id="tab-threat-bl">
+            <table class="data-table">
+              <thead><tr><th>BLACKLIST</th><th>STATUS</th><th>CATEGORY</th></tr></thead>
+              <tbody id="blacklistBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-threat-known">
+            <div id="knownThreats" class="cmd-output"></div>
+          </div>
+          <div class="tab-content" id="tab-threat-links">
+            <div id="threatLinks" class="ext-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── EMAIL / MAIL CONFIG ─────────────── -->
+      <div class="panel" id="panel-email" data-category="web">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">✉</span> MAIL CONFIGURATION & EMAIL SECURITY</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-cyan">EMAIL INTEL</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="info-grid" id="emailGrid"></div>
+          <table class="data-table" style="margin-top:12px;">
+            <thead><tr><th>RECORD TYPE</th><th>VALUE</th><th>STATUS</th><th>SERVICE PROVIDER</th></tr></thead>
+            <tbody id="emailBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ─────────────── CRAWL / FILE PATHS ─────────────── -->
+      <div class="panel" id="panel-crawl" data-category="web">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">🕷</span> CRAWLER & FILE PATHS</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-amber">ACTIVE</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-crawl-paths')">DISCOVERED PATHS</div>
+            <div class="tab" onclick="switchTab(this,'tab-crawl-robots')">ROBOTS.TXT</div>
+            <div class="tab" onclick="switchTab(this,'tab-crawl-sitemap')">SITEMAP</div>
+            <div class="tab" onclick="switchTab(this,'tab-crawl-linked')">LINKED PAGES</div>
+            <div class="tab" onclick="switchTab(this,'tab-crawl-security')">SECURITY.TXT</div>
+            <div class="tab" onclick="switchTab(this,'tab-crawl-cmd')">DIR BUST CMDS</div>
+          </div>
+          <div class="tab-content active" id="tab-crawl-paths">
+            <table class="data-table">
+              <thead><tr><th>PATH</th><th>STATUS</th><th>TYPE</th><th>NOTE</th></tr></thead>
+              <tbody id="pathsBody"></tbody>
+            </table>
+          </div>
+          <div class="tab-content" id="tab-crawl-robots">
+            <div class="cmd-output" id="robotsOutput"></div>
+          </div>
+          <div class="tab-content" id="tab-crawl-sitemap">
+            <div class="cmd-output" id="sitemapOutput"></div>
+          </div>
+          <div class="tab-content" id="tab-crawl-linked">
+            <div class="cmd-output" id="linkedOutput"></div>
+          </div>
+          <div class="tab-content" id="tab-crawl-security">
+            <div class="cmd-output" id="securityTxtOutput"></div>
+          </div>
+          <div class="tab-content" id="tab-crawl-cmd">
+            <div class="cmd-output" id="crawlCmds"></div>
+            <div style="margin-top:8px;"><button class="copy-btn" onclick="copyText('crawlCmds')">⧉ COPY COMMANDS</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─────────────── WEB-CHECK MODULES ─────────────── -->
+      <div class="panel" id="panel-webcheck" data-category="web">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">🌐</span> WEB-CHECK.XYZ MODULE SUITE</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-cyan">31 CHECKS</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="alert alert-info" style="margin-bottom:12px;">
+            <span class="alert-icon">ℹ</span>
+            <span>Click any module to open directly in <strong>web-check.xyz</strong> or deploy locally via Docker: <code style="color:var(--neon-amber);">docker run -p 3000:3000 lissy93/web-check</code></span>
+          </div>
+          <div id="webcheckGrid" class="ext-grid"></div>
+        </div>
+      </div>
+
+      <!-- ─────────────── TRACEROUTE ─────────────── -->
+      <div class="panel" id="panel-traceroute" data-category="network">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">◈</span> TRACEROUTE & HOPS</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-amber">ACTIVE</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="info-grid" id="tracerouteGrid"></div>
+          <div class="cmd-output" id="tracerouteOutput" style="margin-top:10px;"></div>
+          <div style="margin-top:8px;"><button class="copy-btn" onclick="copyText('tracerouteOutput')">⧉ COPY COMMANDS</button></div>
+        </div>
+      </div>
+
+      <!-- ─────────────── ARCHIVE & HISTORY ─────────────── -->
+      <div class="panel" id="panel-archive" data-category="web">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">🗄</span> ARCHIVE HISTORY & CACHED VERSIONS</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-purple">OSINT</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div id="archiveLinks" class="ext-grid"></div>
+        </div>
+      </div>
+
+      <!-- ─────────────── EXTERNAL TOOLS ─────────────── -->
+      <div class="panel" id="panel-external" data-category="external">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">🔗</span> EXTERNAL INTELLIGENCE TOOLS — DEEP LINKS</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-cyan">28 PLATFORMS</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div class="alert alert-info" style="margin-bottom:12px;">
+            <span class="alert-icon">ℹ</span>
+            <span>All links are pre-populated with your target. Click to open directly in the platform. API keys required for some services.</span>
+          </div>
+          <!-- Category tabs for external tools -->
+          <div class="tab-bar">
+            <div class="tab active" onclick="switchTab(this,'tab-ext-all')">ALL TOOLS</div>
+            <div class="tab" onclick="switchTab(this,'tab-ext-threat')">THREAT INTEL</div>
+            <div class="tab" onclick="switchTab(this,'tab-ext-dns')">DNS / DOMAIN</div>
+            <div class="tab" onclick="switchTab(this,'tab-ext-performance')">PERF / SEO</div>
+            <div class="tab" onclick="switchTab(this,'tab-ext-sandbox')">SANDBOX</div>
+          </div>
+          <div class="tab-content active" id="tab-ext-all"><div id="extGridAll" class="ext-grid"></div></div>
+          <div class="tab-content" id="tab-ext-threat"><div id="extGridThreat" class="ext-grid"></div></div>
+          <div class="tab-content" id="tab-ext-dns"><div id="extGridDns" class="ext-grid"></div></div>
+          <div class="tab-content" id="tab-ext-performance"><div id="extGridPerf" class="ext-grid"></div></div>
+          <div class="tab-content" id="tab-ext-sandbox"><div id="extGridSandbox" class="ext-grid"></div></div>
+        </div>
+      </div>
+
+      <!-- ─────────────── SCAN SUMMARY ─────────────── -->
+      <div class="panel" id="panel-summary" data-category="all">
+        <div class="panel-header" onclick="togglePanel(this)">
+          <div class="panel-title"><span class="panel-icon">📋</span> SCAN SUMMARY & REPORT</div>
+          <div class="panel-actions">
+            <span class="panel-tag tag-green">COMPLETE</span>
+            <span class="panel-toggle open">▼</span>
+          </div>
+        </div>
+        <div class="panel-body open">
+          <div id="summaryContent"></div>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="exportReport()">⬇ EXPORT HTML REPORT</button>
+            <button class="btn btn-outline" onclick="exportJSON()">{ } EXPORT JSON</button>
+            <button class="btn btn-outline btn-cyan" onclick="copyAllResults()">⧉ COPY SUMMARY</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /resultsState -->
+  </div><!-- /content-area -->
+</div><!-- /main-layout -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  RECON-X CORE ENGINE
+// ═══════════════════════════════════════════════════════════
+
+let scanData = {};
+let currentTarget = '';
+let scanStartTime = null;
+let timerInterval = null;
+
+// ── UI HELPERS ──────────────────────────────────────────────
+
+function togglePanel(header) {
+  const body = header.nextElementSibling;
+  const toggle = header.querySelector('.panel-toggle');
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function switchTab(tab, contentId) {
+  const tabBar = tab.closest('.tab-bar');
+  tabBar.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  const panel = tabBar.nextElementSibling.closest
+    ? tabBar.parentElement
+    : tabBar.parentElement;
+  panel.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const target = document.getElementById(contentId);
+  if (target) target.classList.add('active');
+}
+
+function scrollToPanel(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function expandAll() {
+  document.querySelectorAll('.panel-body').forEach(b => b.classList.add('open'));
+  document.querySelectorAll('.panel-toggle').forEach(t => t.classList.add('open'));
+}
+
+function collapseAll() {
+  document.querySelectorAll('.panel-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.panel-toggle').forEach(t => t.classList.remove('open'));
+}
+
+function setFilter(chip, filter) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  document.querySelectorAll('.panel[data-category]').forEach(p => {
+    const cat = p.dataset.category;
+    if (filter === 'all' || cat === filter || cat === 'all') {
+      p.style.display = '';
+    } else {
+      p.style.display = 'none';
+    }
+  });
+}
+
+function copyText(elementId) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    showToast('Copied to clipboard!');
+  });
+}
+
+function copyAllResults() {
+  const text = JSON.stringify(scanData, null, 2);
+  navigator.clipboard.writeText(text).then(() => showToast('Full results copied!'));
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;background:#001a0e;border:1px solid #00ff8840;color:#00ff88;padding:10px 18px;border-radius:4px;font-family:\'Share Tech Mono\',monospace;font-size:0.75rem;letter-spacing:1px;';
+  t.textContent = '✓ ' + msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+function makeTile(label, value, colorClass = '') {
+  return `<div class="info-tile"><div class="info-tile-label">${label}</div><div class="info-tile-value ${colorClass}">${value || '—'}</div></div>`;
+}
+
+function makeRow(...cells) {
+  return '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+}
+
+function makeExtCard(name, url, desc, icon = '🔗', tag = null) {
+  const fullUrl = url.includes('http') ? url : '#';
+  return `<a class="ext-card" href="${fullUrl}" target="_blank" rel="noopener">
+    <div class="ext-card-icon">${icon}</div>
+    <div class="ext-card-name">${name}</div>
+    <div class="ext-card-desc">${desc}</div>
+    <div class="ext-card-url">${url.replace(/https?:\/\//, '').split('/')[0]}</div>
+  </a>`;
+}
+
+// ── TIMER ───────────────────────────────────────────────────
+function startTimer() {
+  scanStartTime = Date.now();
+  timerInterval = setInterval(() => {
+    const elapsed = ((Date.now() - scanStartTime) / 1000).toFixed(1);
+    document.getElementById('scanTimer').textContent = `⏱ ${elapsed}s elapsed`;
+  }, 100);
+}
+function stopTimer() {
+  clearInterval(timerInterval);
+  const elapsed = ((Date.now() - scanStartTime) / 1000).toFixed(1);
+  document.getElementById('scanTimer').textContent = `⏱ Completed in ${elapsed}s`;
+}
+
+// ── TARGET PARSER ────────────────────────────────────────────
+function parseTarget(raw) {
+  raw = raw.trim();
+  let domain = raw, ip = '', isIP = false, protocol = 'https';
+  try {
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+      const u = new URL(raw);
+      domain = u.hostname;
+      protocol = u.protocol.replace(':','');
+    }
+  } catch(e) {}
+  // Remove port if present
+  if (domain.includes(':')) domain = domain.split(':')[0];
+  // Check if IP
+  isIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(domain);
+  return { raw, domain, ip, isIP, protocol };
+}
+
+// ── MAIN SCAN ORCHESTRATOR ───────────────────────────────────
+async function startRecon() {
+  const input = document.getElementById('targetInput').value.trim();
+  if (!input) {
+    document.getElementById('targetInput').style.borderBottom = '2px solid var(--neon-red)';
+    setTimeout(() => document.getElementById('targetInput').style.borderBottom = '', 2000);
+    return;
+  }
+
+  const target = parseTarget(input);
+  currentTarget = target.domain;
+  scanData = { target: target.domain, timestamp: new Date().toISOString(), modules: {} };
+
+  // UI setup
+  document.getElementById('welcomeState').style.display = 'none';
+  document.getElementById('resultsState').style.display = 'block';
+  document.getElementById('sidebarTarget').textContent = target.domain;
+  document.getElementById('overallScore').style.display = 'block';
+  document.getElementById('systemStatus').textContent = 'SCANNING...';
+  document.getElementById('scanBtn').textContent = '⟳ SCANNING';
+  document.getElementById('scanBtn').classList.add('loading');
+  document.getElementById('scanningLine').classList.add('active');
+  startTimer();
+
+  // Run all modules (simulated with real command generation + API calls where possible)
+  await Promise.all([
+    runPing(target),
+    runIPInfo(target),
+    runPortScan(target),
+    runDNS(target),
+    runSubdomains(target),
+    runSSL(target),
+    runHeaders(target),
+    runWhois(target),
+    runTechStack(target),
+    runThreatIntel(target),
+    runMailConfig(target),
+    runCrawler(target),
+    runTraceroute(target),
+    runArchive(target),
+  ]);
+
+  populateWebCheck(target);
+  populateExternalTools(target);
+  buildSummary(target);
+
+  // Cleanup
+  document.getElementById('systemStatus').textContent = 'SCAN COMPLETE';
+  document.getElementById('scanBtn').textContent = '⬡ RE-SCAN';
+  document.getElementById('scanBtn').classList.remove('loading');
+  document.getElementById('scanningLine').classList.remove('active');
+  stopTimer();
+}
+
+// ── PING MODULE ──────────────────────────────────────────────
+async function runPing(target) {
+  const d = target.domain;
+  const cmd = navigator.platform.includes('Win')
+    ? `ping -n 10 ${d}`
+    : `ping -c 10 ${d}`;
+  document.getElementById('pingCmd').textContent = cmd;
+
+  // Try to get real data via fetch timing
+  const times = [];
+  for (let i = 0; i < 3; i++) {
+    try {
+      const t0 = performance.now();
+      await fetch(`https://${d}/favicon.ico`, { mode: 'no-cors', cache: 'no-store' });
+      times.push(Math.round(performance.now() - t0));
+    } catch(e) { times.push(null); }
+  }
+  const validTimes = times.filter(t => t !== null);
+  const avgRTT = validTimes.length ? Math.round(validTimes.reduce((a,b)=>a+b,0)/validTimes.length) : 'N/A';
+  const minRTT = validTimes.length ? Math.min(...validTimes) : 'N/A';
+  const maxRTT = validTimes.length ? Math.max(...validTimes) : 'N/A';
+  const loss = Math.round((1 - validTimes.length/3)*100);
+  const reachable = validTimes.length > 0;
+
+  document.getElementById('nav-ping').textContent = reachable ? 'ALIVE' : 'DOWN';
+  document.getElementById('nav-ping').className = reachable ? 'nav-badge' : 'nav-badge warn';
+  document.getElementById('pingStatus').textContent = reachable ? 'REACHABLE' : 'UNREACHABLE';
+  document.getElementById('pingStatus').className = reachable ? 'panel-tag tag-green' : 'panel-tag tag-red';
+
+  document.getElementById('pingGrid').innerHTML =
+    makeTile('STATUS', reachable ? '● REACHABLE' : '○ UNREACHABLE', reachable ? 'val-green' : 'val-red') +
+    makeTile('AVG RTT', avgRTT !== 'N/A' ? avgRTT+'ms' : 'N/A', 'val-cyan') +
+    makeTile('MIN RTT', minRTT !== 'N/A' ? minRTT+'ms' : 'N/A', 'val-green') +
+    makeTile('MAX RTT', maxRTT !== 'N/A' ? maxRTT+'ms' : 'N/A', 'val-amber') +
+    makeTile('PACKET LOSS', loss+'%', loss > 0 ? 'val-amber' : 'val-green') +
+    makeTile('SAMPLES', times.length+'');
+
+  document.getElementById('pingOutput').innerHTML =
+`<span class="cmd-prompt">$ ${cmd}</span>
+
+PING ${d}: 56 data bytes
+--- ${d} ping statistics ---
+3 packets transmitted, ${validTimes.length} packets received, ${loss}% packet loss
+round-trip min/avg/max = ${minRTT}/${avgRTT}/${maxRTT} ms
+
+<span class="cmd-info">STATUS: ${reachable ? '✓ HOST IS REACHABLE' : '✗ HOST UNREACHABLE OR FILTERED'}</span>
+
+<span class="cmd-prompt">Windows Command:</span>
+ping -n 10 -l 64 ${d}
+
+<span class="cmd-prompt">Linux/Mac Command:</span>
+ping -c 10 -s 56 ${d}
+
+<span class="cmd-prompt">Verbose Ping (PowerShell):</span>
+Test-NetConnection -ComputerName ${d} -InformationLevel Detailed`;
+
+  scanData.modules.ping = { reachable, avgRTT, minRTT, maxRTT, loss };
+}
+
+// ── IP INFO MODULE ───────────────────────────────────────────
+async function runIPInfo(target) {
+  const d = target.domain;
+  let ipData = {};
+
+  try {
+    const res = await fetch(`https://ipapi.co/${d}/json/`);
+    if (res.ok) ipData = await res.json();
+  } catch(e) {
+    // Fallback - try another API
+    try {
+      const res2 = await fetch(`https://api.iplocation.net/?ip=${d}`);
+      if (res2.ok) ipData = await res2.json();
+    } catch(e2) {}
+  }
+
+  const ip = ipData.ip || ipData.ip_address || 'Lookup required';
+  const org = ipData.org || ipData.isp || '—';
+  const asn = ipData.asn || (org.split(' ')[0]) || '—';
+  const city = ipData.city || '—';
+  const region = ipData.region || '—';
+  const country = ipData.country_name || ipData.country_name || '—';
+  const lat = ipData.latitude || '—';
+  const lon = ipData.longitude || '—';
+  const tz = ipData.timezone || '—';
+
+  document.getElementById('nav-ip').textContent = 'DONE';
+  document.getElementById('ipGrid').innerHTML =
+    makeTile('IP ADDRESS', ip, 'val-green') +
+    makeTile('ORGANIZATION', org.substring(0,20), 'val-cyan') +
+    makeTile('ASN', asn, 'val-amber') +
+    makeTile('CITY', city) +
+    makeTile('COUNTRY', country) +
+    makeTile('TIMEZONE', tz) +
+    makeTile('LATITUDE', String(lat)) +
+    makeTile('LONGITUDE', String(lon));
+
+  document.getElementById('ipLinks').innerHTML = `
+    <a class="btn btn-outline btn-sm btn-cyan" href="https://www.shodan.io/host/${ip}" target="_blank">Shodan →</a>
+    <a class="btn btn-outline btn-sm" href="https://www.abuseipdb.com/check/${ip}" target="_blank">AbuseIPDB →</a>
+    <a class="btn btn-outline btn-sm" href="https://bgp.tools/search?q=${asn}" target="_blank">BGP Tools →</a>
+    <a class="btn btn-outline btn-sm" href="https://search.censys.io/hosts/${ip}" target="_blank">Censys →</a>
+    <a class="btn btn-outline btn-sm" href="https://whatismyipaddress.com/ip/${ip}" target="_blank">IP Lookup →</a>
+  `;
+
+  scanData.modules.ip = { ip, org, asn, city, country, lat, lon, tz };
+}
+
+// ── PORT SCAN MODULE ─────────────────────────────────────────
+async function runPortScan(target) {
+  const d = target.domain;
+  const commonPorts = [
+    { port: 21, service: 'FTP', proto: 'TCP', risk: 'HIGH', desc: 'File Transfer Protocol' },
+    { port: 22, service: 'SSH', proto: 'TCP', risk: 'MED', desc: 'Secure Shell' },
+    { port: 23, service: 'Telnet', proto: 'TCP', risk: 'CRIT', desc: 'Telnet (unencrypted)' },
+    { port: 25, service: 'SMTP', proto: 'TCP', risk: 'MED', desc: 'Simple Mail Transfer' },
+    { port: 53, service: 'DNS', proto: 'UDP/TCP', risk: 'MED', desc: 'Domain Name System' },
+    { port: 80, service: 'HTTP', proto: 'TCP', risk: 'MED', desc: 'Hypertext Transfer Protocol' },
+    { port: 110, service: 'POP3', proto: 'TCP', risk: 'MED', desc: 'Post Office Protocol v3' },
+    { port: 143, service: 'IMAP', proto: 'TCP', risk: 'MED', desc: 'Internet Message Access' },
+    { port: 443, service: 'HTTPS', proto: 'TCP', risk: 'LOW', desc: 'HTTP over SSL/TLS' },
+    { port: 445, service: 'SMB', proto: 'TCP', risk: 'CRIT', desc: 'Server Message Block' },
+    { port: 993, service: 'IMAPS', proto: 'TCP', risk: 'LOW', desc: 'Secure IMAP' },
+    { port: 995, service: 'POP3S', proto: 'TCP', risk: 'LOW', desc: 'Secure POP3' },
+    { port: 3306, service: 'MySQL', proto: 'TCP', risk: 'CRIT', desc: 'MySQL Database' },
+    { port: 3389, service: 'RDP', proto: 'TCP', risk: 'HIGH', desc: 'Remote Desktop' },
+    { port: 5432, service: 'PostgreSQL', proto: 'TCP', risk: 'CRIT', desc: 'PostgreSQL DB' },
+    { port: 6379, service: 'Redis', proto: 'TCP', risk: 'CRIT', desc: 'Redis Cache' },
+    { port: 8080, service: 'HTTP-ALT', proto: 'TCP', risk: 'MED', desc: 'Alt HTTP Port' },
+    { port: 8443, service: 'HTTPS-ALT', proto: 'TCP', risk: 'LOW', desc: 'Alt HTTPS Port' },
+  ];
+
+  // Simulate port probe via fetch (limited in browser, but gives 80/443 state)
+  const results = [];
+  for (const p of commonPorts) {
+    let state = 'filtered'; let banner = '—';
+    if (p.port === 80 || p.port === 443 || p.port === 8080 || p.port === 8443) {
+      try {
+        const scheme = (p.port === 443 || p.port === 8443) ? 'https' : 'http';
+        const t0 = performance.now();
+        await fetch(`${scheme}://${d}:${p.port}/`, { mode: 'no-cors', signal: AbortSignal.timeout(3000) });
+        const rtt = Math.round(performance.now() - t0);
+        state = 'open';
+        banner = `RTT: ${rtt}ms`;
+      } catch(e) {
+        state = e.name === 'AbortError' ? 'filtered' : 'closed';
+      }
+    }
+    results.push({ ...p, state, banner });
+  }
+
+  const openPorts = results.filter(r => r.state === 'open');
+  document.getElementById('nav-ports').textContent = openPorts.length + ' OPEN';
+
+  // Ports table
+  document.getElementById('portsBody').innerHTML = results.map(r => {
+    const stateClass = r.state === 'open' ? 'val-green port-open' : r.state === 'filtered' ? 'val-amber port-filtered' : 'val-red port-closed';
+    return makeRow(
+      `<span class="val-cyan">${r.port}</span>`,
+      `<span class="${stateClass}">${r.state.toUpperCase()}</span>`,
+      r.service,
+      r.proto,
+      r.banner
+    );
+  }).join('');
+
+  // Services table
+  document.getElementById('servicesBody').innerHTML = results.filter(r => r.state !== 'closed').map(r => {
+    const riskColor = r.risk === 'CRIT' ? 'val-red' : r.risk === 'HIGH' ? 'val-amber' : r.risk === 'MED' ? 'val-cyan' : 'val-green';
+    return makeRow(r.service, r.port, r.desc, `<span class="${riskColor}">${r.risk}</span>`);
+  }).join('');
+
+  // Versions table (reference)
+  document.getElementById('versionsBody').innerHTML = results.filter(r => r.state === 'open').map(r =>
+    makeRow(r.service, '<span class="val-muted">Run nmap -sV to detect</span>', `<a href="https://www.shodan.io/search?query=port:${r.port}" target="_blank" class="val-cyan">Shodan →</a>`, r.desc)
+  ).join('');
+
+  // Nmap commands
+  document.getElementById('nmapCmds').innerHTML =
+`<span class="cmd-prompt"># BASIC PORT SCAN (Top 1000 ports)</span>
+nmap -Pn -T4 ${d}
+
+<span class="cmd-prompt"># FULL PORT SCAN (all 65535 ports)</span>
+nmap -Pn -p- -T4 --open ${d}
+
+<span class="cmd-prompt"># SERVICE & VERSION DETECTION</span>
+nmap -Pn -sV -sC -T4 ${d}
+
+<span class="cmd-prompt"># OS DETECTION + VERSION + SCRIPTS</span>
+nmap -Pn -A -T4 ${d}
+
+<span class="cmd-prompt"># VULNERABILITY SCAN (NSE scripts)</span>
+nmap -Pn --script vuln ${d}
+
+<span class="cmd-prompt"># HTTP ENUMERATION</span>
+nmap -Pn --script http-enum -p80,443,8080,8443 ${d}
+
+<span class="cmd-prompt"># UDP TOP PORTS</span>
+nmap -Pn -sU --top-ports 100 ${d}
+
+<span class="cmd-prompt"># STEALTH SCAN (requires root)</span>
+sudo nmap -Pn -sS -T2 ${d}
+
+<span class="cmd-prompt"># AGGRESSIVE SCAN WITH TRACEROUTE</span>
+nmap -Pn -A -T4 --traceroute ${d}
+
+<span class="cmd-prompt"># SAVE OUTPUT</span>
+nmap -Pn -sV -sC -T4 -oA recon_${d} ${d}
+
+<span class="cmd-info">⚠ Note: Full port scan on remote targets requires permission. Use responsibly.</span>`;
+
+  scanData.modules.ports = results;
+}
+
+// ── DNS MODULE ───────────────────────────────────────────────
+async function runDNS(target) {
+  const d = target.domain;
+  let records = [];
+
+  // Use DNS-over-HTTPS for real lookups
+  const types = ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME', 'SOA', 'CAA'];
+  for (const type of types) {
+    try {
+      const res = await fetch(`https://cloudflare-dns.com/dns-query?name=${d}&type=${type}`, {
+        headers: { 'Accept': 'application/dns-json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.Answer) {
+          data.Answer.forEach(rec => {
+            records.push({ type: type, name: rec.name, value: rec.data, ttl: rec.TTL });
+          });
+        }
+      }
+    } catch(e) {}
+  }
+
+  document.getElementById('nav-dns').textContent = records.length + ' REC';
+  document.getElementById('dnsStatus').textContent = records.length > 0 ? 'RESOLVED' : 'NO DATA';
+
+  if (records.length === 0) {
+    records = [
+      { type: 'A', name: d+'.', value: 'No records found (try locally)', ttl: 0 },
+      { type: 'NOTE', name: d+'.', value: 'Some records may be blocked by CORS. Use dig/nslookup locally.', ttl: 0 }
+    ];
+  }
+
+  document.getElementById('dnsBody').innerHTML = records.map(r => {
+    const typeColor = r.type === 'A' ? 'val-green' : r.type === 'MX' ? 'val-amber' :
+      r.type === 'TXT' ? 'val-cyan' : r.type === 'NS' ? 'val-purple' : 'val-muted';
+    return makeRow(
+      `<span class="${typeColor}">${r.type}</span>`,
+      `<span class="val-muted">${r.name}</span>`,
+      `<span style="word-break:break-all;">${r.value}</span>`,
+      `<span class="val-muted">${r.ttl}s</span>`
+    );
+  }).join('');
+
+  // DNS Server info
+  const nsRecords = records.filter(r => r.type === 'NS');
+  document.getElementById('dnsServerGrid').innerHTML =
+    makeTile('NAME SERVERS', nsRecords.length > 0 ? nsRecords[0].value : 'Query locally', 'val-cyan') +
+    makeTile('SOA RECORD', records.find(r=>r.type==='SOA') ? records.find(r=>r.type==='SOA').value.substring(0,30) : '—') +
+    makeTile('TOTAL RECORDS', records.length+'', 'val-green') +
+    makeTile('HAS AAAA', records.some(r=>r.type==='AAAA') ? 'YES (IPv6)' : 'NO', records.some(r=>r.type==='AAAA') ? 'val-green' : 'val-muted');
+
+  // DNSSEC
+  document.getElementById('dnssecInfo').innerHTML =
+`<span class="cmd-prompt"># Check DNSSEC status</span>
+dig +dnssec ${d} DNSKEY
+dig +dnssec ${d} DS
+
+<span class="cmd-prompt"># Validate DNSSEC chain</span>
+dig +sigchase +trusted-key=/etc/trusted-key.key ${d} A
+
+<span class="cmd-prompt"># Online DNSSEC analyzer:</span>
+<span class="cmd-info">https://dnssec-analyzer.verisignlabs.com/?zone=${d}</span>
+<span class="cmd-info">https://dnsviz.net/d/${d}/dnssec/</span>
+
+<span class="cmd-warn">Note: DNSSEC validation requires local resolver with DNSSEC support enabled.</span>`;
+
+  // DNS Commands
+  document.getElementById('dnsCmds').innerHTML =
+`<span class="cmd-prompt"># A Records (IPv4)</span>
+dig A ${d} +short
+nslookup -type=A ${d}
+
+<span class="cmd-prompt"># AAAA Records (IPv6)</span>
+dig AAAA ${d} +short
+
+<span class="cmd-prompt"># MX Records (Mail Servers)</span>
+dig MX ${d} +short
+
+<span class="cmd-prompt"># TXT Records (SPF/DMARC/DKIM)</span>
+dig TXT ${d}
+dig TXT _dmarc.${d}
+dig TXT _domainkey.${d}
+
+<span class="cmd-prompt"># NS Records (Name Servers)</span>
+dig NS ${d} +short
+
+<span class="cmd-prompt"># SOA Record</span>
+dig SOA ${d}
+
+<span class="cmd-prompt"># CAA Record (Certificate Authority)</span>
+dig CAA ${d}
+
+<span class="cmd-prompt"># Reverse DNS (PTR)</span>
+dig -x <IP_ADDRESS>
+
+<span class="cmd-prompt"># Zone Transfer Attempt (for testing)</span>
+dig axfr ${d} @<nameserver>
+
+<span class="cmd-prompt"># All records</span>
+dig ANY ${d} +noall +answer
+
+<span class="cmd-prompt"># DNS Trace</span>
+dig +trace ${d}`;
+
+  scanData.modules.dns = records;
+}
+
+// ── SUBDOMAINS MODULE ────────────────────────────────────────
+async function runSubdomains(target) {
+  const d = target.domain;
+  const subs = [];
+
+  // Passive: Try crt.sh for certificate transparency
+  try {
+    const res = await fetch(`https://crt.sh/?q=%25.${d}&output=json`);
+    if (res.ok) {
+      const certs = await res.json();
+      const seen = new Set();
+      certs.slice(0, 50).forEach(c => {
+        const names = (c.name_value || '').split('\n');
+        names.forEach(n => {
+          n = n.trim().toLowerCase();
+          if (n && n.endsWith(d) && !seen.has(n) && !n.startsWith('*')) {
+            seen.add(n);
+            subs.push({ sub: n, ip: '—', source: 'crt.sh', status: 'discovered' });
+          }
+        });
+      });
+    }
+  } catch(e) {}
+
+  document.getElementById('nav-subs').textContent = subs.length > 0 ? subs.length+' FOUND' : '—';
+
+  if (subs.length === 0) {
+    subs.push({ sub: d, ip: '—', source: 'manual', status: 'base domain' });
+    subs.push({ sub: 'www.'+d, ip: '—', source: 'common', status: 'common' });
+    subs.push({ sub: 'mail.'+d, ip: '—', source: 'common', status: 'common' });
+    subs.push({ sub: 'api.'+d, ip: '—', source: 'common', status: 'common' });
+    subs.push({ sub: 'dev.'+d, ip: '—', source: 'common', status: 'common' });
+    subs.push({ sub: 'staging.'+d, ip: '—', source: 'common', status: 'common' });
+    subs.push({ sub: 'admin.'+d, ip: '—', source: 'common', status: 'common' });
+  }
+
+  document.getElementById('subdomainsBody').innerHTML = subs.slice(0,50).map((s, i) => {
+    const statusColor = s.source === 'crt.sh' ? 'val-green' : 'val-muted';
+    return makeRow(
+      `<span class="val-cyan">${s.sub}</span>`,
+      `<span class="val-muted">${s.ip}</span>`,
+      `<span class="${statusColor}">${s.source}</span>`,
+      `<span class="val-green">${s.status}</span>`
+    );
+  }).join('');
+
+  document.getElementById('subCmds').innerHTML =
+`<span class="cmd-prompt"># PASSIVE ENUMERATION</span>
+<span class="cmd-info"># Certificate Transparency</span>
+curl "https://crt.sh/?q=%.${d}&output=json" | jq '.[].name_value' | sort -u
+
+<span class="cmd-info"># Subfinder (recommended)</span>
+subfinder -d ${d} -all -o subdomains.txt
+
+<span class="cmd-info"># Amass (comprehensive)</span>
+amass enum -passive -d ${d}
+amass enum -active -d ${d} -brute
+
+<span class="cmd-info"># Sublist3r</span>
+python sublist3r.py -d ${d}
+
+<span class="cmd-prompt"># ACTIVE BRUTE FORCE</span>
+<span class="cmd-info"># Gobuster DNS</span>
+gobuster dns -d ${d} -w /usr/share/wordlists/subdomains.txt -t 50
+
+<span class="cmd-info"># Nmap DNS brute</span>
+nmap --script dns-brute ${d}
+
+<span class="cmd-info"># massdns</span>
+massdns -r resolvers.txt -t A -o S subdomains.txt > results.txt
+
+<span class="cmd-prompt"># REVERSE DNS / RELATED IPs</span>
+dig -x <IP> +short
+<span class="cmd-info"># Use Shodan, Censys for ASN-based enumeration</span>
+curl "https://api.shodan.io/shodan/host/search?query=hostname:${d}&key=YOUR_API_KEY"
+
+<span class="cmd-prompt"># ZONE TRANSFER</span>
+host -l ${d} <nameserver>
+dig axfr ${d} @<nameserver>`;
+
+  scanData.modules.subdomains = subs;
+}
+
+// ── SSL MODULE ───────────────────────────────────────────────
+async function runSSL(target) {
+  const d = target.domain;
+  let hasSSL = false;
+  let certData = {};
+
+  try {
+    const res = await fetch(`https://${d}/`, { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+    hasSSL = res.url.startsWith('https://');
+    certData = {
+      subject: d,
+      issuer: 'Fetch API limited (run testssl.sh locally)',
+      validFrom: '—',
+      validTo: '—',
+      serialNumber: '—',
+      fingerprint: '—',
+    };
+  } catch(e) {
+    hasSSL = false;
+  }
+
+  document.getElementById('nav-ssl').textContent = hasSSL ? 'VALID' : 'CHECK';
+  document.getElementById('sslStatus').textContent = hasSSL ? 'SSL DETECTED' : 'MANUAL CHECK';
+  document.getElementById('sslStatus').className = hasSSL ? 'panel-tag tag-green' : 'panel-tag tag-amber';
+
+  document.getElementById('sslGrid').innerHTML =
+    makeTile('SSL DETECTED', hasSSL ? '✓ YES' : '? UNKNOWN', hasSSL ? 'val-green' : 'val-amber') +
+    makeTile('SUBJECT', d, 'val-cyan') +
+    makeTile('PROTOCOL', 'HTTPS', hasSSL ? 'val-green' : 'val-red') +
+    makeTile('DEEP ANALYSIS', 'Use SSL Labs', 'val-amber');
+
+  document.getElementById('sslCertBody').innerHTML =
+    makeRow('Domain', `<span class="val-cyan">${d}</span>`) +
+    makeRow('SSL Detected', `<span class="${hasSSL ? 'val-green' : 'val-amber'}">${hasSSL ? 'YES' : 'REQUIRES LOCAL CHECK'}</span>`) +
+    makeRow('Full Analysis', `<a class="val-cyan" href="https://www.ssllabs.com/ssltest/analyze.html?d=${d}" target="_blank">Open SSL Labs →</a>`) +
+    makeRow('Quick Check', `<a class="val-cyan" href="https://www.sslshopper.com/ssl-checker.html#hostname=${d}" target="_blank">SSL Shopper →</a>`);
+
+  document.getElementById('tlsBody').innerHTML =
+    makeRow('TLS 1.3', '<span class="val-green">RECOMMENDED</span>', 'Use exclusively if possible') +
+    makeRow('TLS 1.2', '<span class="val-amber">ACCEPTABLE</span>', 'OK with strong cipher suites') +
+    makeRow('TLS 1.1', '<span class="val-red">DEPRECATED</span>', 'Disable — violates PCI DSS') +
+    makeRow('TLS 1.0', '<span class="val-red">INSECURE</span>', 'Disable — POODLE vulnerable') +
+    makeRow('SSL 3.0', '<span class="val-red">CRITICAL</span>', 'Disable immediately') +
+    makeRow('SSL 2.0', '<span class="val-red">CRITICAL</span>', 'Disable immediately');
+
+  document.getElementById('sslCmds').innerHTML =
+`<span class="cmd-prompt"># testssl.sh (most comprehensive)</span>
+testssl.sh ${d}
+testssl.sh --full ${d}
+testssl.sh --html ${d} > ssl-report.html
+
+<span class="cmd-prompt"># OpenSSL</span>
+openssl s_client -connect ${d}:443 -showcerts
+openssl s_client -connect ${d}:443 | openssl x509 -noout -dates
+openssl s_client -connect ${d}:443 | openssl x509 -noout -text
+
+<span class="cmd-prompt"># Check specific TLS version</span>
+openssl s_client -connect ${d}:443 -tls1_3
+openssl s_client -connect ${d}:443 -tls1_2
+openssl s_client -connect ${d}:443 -ssl3   # Should fail
+
+<span class="cmd-prompt"># nmap SSL enum</span>
+nmap --script ssl-enum-ciphers -p443 ${d}
+nmap --script ssl-cert -p443 ${d}
+
+<span class="cmd-prompt"># Check certificate transparency</span>
+curl "https://crt.sh/?q=${d}&output=json" | jq '.[0]'
+
+<span class="cmd-info"># Online: https://www.ssllabs.com/ssltest/analyze.html?d=${d}</span>`;
+
+  scanData.modules.ssl = { hasSSL, domain: d };
+}
+
+// ── HTTP HEADERS MODULE ──────────────────────────────────────
+async function runHeaders(target) {
+  const d = target.domain;
+  let headers = {};
+  let finalUrl = '';
+  let redirectChain = [];
+
+  try {
+    const res = await fetch(`https://${d}/`, { signal: AbortSignal.timeout(8000) });
+    finalUrl = res.url;
+    res.headers.forEach((v, k) => { headers[k] = v; });
+    if (res.url !== `https://${d}/`) {
+      redirectChain.push(`https://${d}/ → ${res.url}`);
+    }
+  } catch(e) {
+    try {
+      const res2 = await fetch(`http://${d}/`, { signal: AbortSignal.timeout(5000) });
+      finalUrl = res2.url;
+      res2.headers.forEach((v, k) => { headers[k] = v; });
+    } catch(e2) {}
+  }
+
+  document.getElementById('nav-headers').textContent = 'DONE';
+
+  const securityHeaders = [
+    { name: 'Strict-Transport-Security', key: 'strict-transport-security', desc: 'HSTS' },
+    { name: 'Content-Security-Policy', key: 'content-security-policy', desc: 'CSP' },
+    { name: 'X-Frame-Options', key: 'x-frame-options', desc: 'Clickjacking' },
+    { name: 'X-Content-Type-Options', key: 'x-content-type-options', desc: 'MIME sniffing' },
+    { name: 'Referrer-Policy', key: 'referrer-policy', desc: 'Referrer' },
+    { name: 'Permissions-Policy', key: 'permissions-policy', desc: 'Feature policy' },
+    { name: 'X-XSS-Protection', key: 'x-xss-protection', desc: 'XSS filter' },
+    { name: 'Access-Control-Allow-Origin', key: 'access-control-allow-origin', desc: 'CORS' },
+  ];
+
+  // All headers table
+  const allHeadersHtml = Object.keys(headers).length > 0
+    ? Object.entries(headers).map(([k, v]) => {
+        const analysis = k.includes('server') ? `<span class="val-amber">INFO DISCLOSURE</span>` : '—';
+        return makeRow(`<span class="val-cyan">${k}</span>`, `<span style="word-break:break-all;">${v}</span>`, analysis);
+      }).join('')
+    : makeRow('—', 'Headers require server-side or proxy request (browser CORS limited)', '—') +
+      makeRow('TIP', `Use: curl -I https://${d}`, 'LOCAL TOOL NEEDED');
+  document.getElementById('headersBody').innerHTML = allHeadersHtml;
+
+  // Security headers
+  document.getElementById('secHeadersBody').innerHTML = securityHeaders.map(sh => {
+    const val = headers[sh.key] || headers[sh.name.toLowerCase()];
+    const present = !!val;
+    const risk = present ? '<span class="val-green">✓ PRESENT</span>' : '<span class="val-red">✗ MISSING</span>';
+    const riskLevel = present ? '<span class="val-green">MITIGATED</span>' : '<span class="val-red">RISK</span>';
+    return makeRow(sh.name, risk, val ? val.substring(0,50) : '—', riskLevel);
+  }).join('');
+
+  // HSTS
+  const hsts = headers['strict-transport-security'];
+  document.getElementById('hstsInfo').innerHTML =
+`<span class="cmd-info"># HSTS (HTTP Strict Transport Security)</span>
+Status: ${hsts ? '✓ ENABLED' : '✗ NOT DETECTED (CORS may block this check)'}
+Value:  ${hsts || 'N/A — check locally'}
+
+<span class="cmd-prompt"># Verify HSTS locally:</span>
+curl -sI https://${d} | grep -i strict
+curl -sI https://${d} | grep -i hsts
+
+<span class="cmd-prompt"># Check HSTS preload list:</span>
+https://hstspreload.org/?domain=${d}
+
+HSTS Directives Explained:
+  max-age=31536000       → 1 year (recommended minimum)
+  includeSubDomains      → Apply to all subdomains
+  preload                → Submit to browser preload lists`;
+
+  // Redirects
+  document.getElementById('redirectInfo').innerHTML =
+`<span class="cmd-info"># Redirect Analysis</span>
+Original URL: https://${d}/
+Final URL:    ${finalUrl || 'Could not determine (CORS)'}
+Redirects:    ${redirectChain.length > 0 ? redirectChain.join('\n             ') : 'None detected by browser'}
+
+<span class="cmd-prompt"># Check full redirect chain locally:</span>
+curl -vIL https://${d} 2>&1 | grep -E "Location:|HTTP/"
+
+<span class="cmd-prompt"># With redirect details:</span>
+curl -vIL --max-redirs 20 ${d}
+
+<span class="cmd-prompt"># HTTP to HTTPS redirect check:</span>
+curl -sI http://${d} | grep -i location`;
+
+  scanData.modules.headers = headers;
+}
+
+// ── WHOIS MODULE ─────────────────────────────────────────────
+async function runWhois(target) {
+  const d = target.domain;
+
+  document.getElementById('nav-whois').textContent = 'DONE';
+  document.getElementById('whoisGrid').innerHTML =
+    makeTile('DOMAIN', d, 'val-green') +
+    makeTile('DEEP LOOKUP', 'Use external tool', 'val-amber') +
+    makeTile('RDAP', `rdap.org/domain/${d}`, 'val-cyan') +
+    makeTile('REGISTRAR', 'See WHOIS links →', 'val-muted');
+
+  document.getElementById('whoisOutput').innerHTML =
+`<span class="cmd-prompt"># WHOIS Lookup Commands</span>
+whois ${d}
+whois -h whois.iana.org ${d}
+
+<span class="cmd-prompt"># RDAP (modern replacement for WHOIS)</span>
+curl https://rdap.org/domain/${d}
+
+<span class="cmd-prompt"># Python whois:</span>
+python3 -c "import whois; print(whois.whois('${d}'))"
+
+<span class="cmd-prompt"># Online WHOIS tools (pre-linked in External Tools panel)</span>
+Direct link: https://whois.domaintools.com/${d}
+Direct link: https://who.is/whois/${d}
+Direct link: https://lookup.icann.org/en/lookup?name=${d}
+
+<span class="cmd-info"># Note: Many registrars use WHOIS privacy/proxy services.
+# Use RDAP for structured data: curl https://rdap.org/domain/${d}</span>
+
+<span class="cmd-prompt"># BGP / ASN info:</span>
+curl https://api.bgpview.io/search?query_term=${d}`;
+}
+
+// ── TECH STACK MODULE ────────────────────────────────────────
+async function runTechStack(target) {
+  const d = target.domain;
+  let tech = [];
+  let serverHeader = '—';
+  let poweredBy = '—';
+  let xPlatform = '—';
+
+  // Try to detect from headers
+  try {
+    const res = await fetch(`https://${d}/`, { signal: AbortSignal.timeout(5000) });
+    serverHeader = res.headers.get('server') || '—';
+    poweredBy = res.headers.get('x-powered-by') || '—';
+    xPlatform = res.headers.get('x-platform') || res.headers.get('x-generator') || '—';
+    const generator = res.headers.get('x-generator') || '—';
+
+    if (serverHeader !== '—') tech.push({ tech: serverHeader, cat: 'WEB SERVER', conf: 'HIGH', ver: '—' });
+    if (poweredBy !== '—') tech.push({ tech: poweredBy, cat: 'FRAMEWORK', conf: 'HIGH', ver: '—' });
+    if (xPlatform !== '—') tech.push({ tech: xPlatform, cat: 'PLATFORM', conf: 'MED', ver: '—' });
+  } catch(e) {}
+
+  if (tech.length === 0) {
+    tech = [
+      { tech: 'Use Wappalyzer or BuiltWith', cat: 'NOTE', conf: '—', ver: '—' },
+      { tech: 'Run locally for full detection', cat: 'NOTE', conf: '—', ver: '—' },
+    ];
+  }
+
+  document.getElementById('nav-tech').textContent = tech.length > 2 ? tech.length+' FOUND' : 'DONE';
+  document.getElementById('techBody').innerHTML = tech.map(t => {
+    const confColor = t.conf === 'HIGH' ? 'val-green' : t.conf === 'MED' ? 'val-amber' : 'val-muted';
+    return makeRow(`<span class="val-cyan">${t.tech}</span>`, t.cat, `<span class="${confColor}">${t.conf}</span>`, t.ver);
+  }).join('');
+
+  document.getElementById('wafInfo').innerHTML =
+`<span class="cmd-prompt"># WAF / Firewall Detection</span>
+<span class="cmd-info"># wafw00f (dedicated WAF detector)</span>
+wafw00f https://${d}
+wafw00f -a https://${d}   # Test all WAFs
+
+<span class="cmd-info"># Nmap WAF detection</span>
+nmap -p80,443 --script http-waf-detect ${d}
+nmap -p80,443 --script http-waf-fingerprint ${d}
+
+<span class="cmd-info"># Online WAF check:</span>
+https://whatismywafis.com/
+https://radar.cloudflare.com/domains/domain/${d}
+
+Common WAF indicators:
+  Cloudflare  → CF-RAY header, cloudflare in Server header
+  AWS WAF     → x-amzn-RequestId, x-amz-apigw headers
+  Akamai      → x-check-cacheable, x-akamai-* headers
+  Imperva     → x-cdn: Incapsula
+  F5 BIG-IP   → x-wa-info, BigIP cookies
+
+<span class="cmd-prompt"># Cloudflare-specific:</span>
+curl -sI https://${d} | grep -i "CF-"
+dig ${d} +short | grep -E "104\.|172\.64\.|108\."`;
+
+  document.getElementById('featuresInfo').innerHTML =
+`<span class="cmd-prompt"># Site Features Detection</span>
+<span class="cmd-info"># Check for common endpoints:</span>
+curl -sI https://${d}/admin
+curl -sI https://${d}/login
+curl -sI https://${d}/wp-admin
+curl -sI https://${d}/api/
+curl -sI https://${d}/.well-known/
+
+<span class="cmd-info"># Check for common CMS indicators:</span>
+curl -s https://${d}/ | grep -i "wp-content\|drupal\|joomla"
+
+<span class="cmd-info"># Social Tags (Open Graph / Twitter Card):</span>
+curl -s https://${d}/ | grep -E "og:|twitter:|apple-"
+
+<span class="cmd-info"># Direct web-check link for full feature analysis:</span>
+https://web-check.xyz/#${d}`;
+
+  document.getElementById('carbonInfo').innerHTML =
+`<span class="cmd-prompt"># Carbon Footprint & Global Rank</span>
+<span class="cmd-info"># Carbon footprint estimate (web.dev approach):</span>
+https://www.websitecarbon.com/website/${d}/
+
+<span class="cmd-info"># Global Alexa/SimilarWeb rank:</span>
+https://www.similarweb.com/website/${d}/
+
+<span class="cmd-info"># Google PageSpeed (Performance):</span>
+https://developers.google.com/speed/pagespeed/insights/?url=${d}
+
+<span class="cmd-info"># GTmetrix:</span>
+https://gtmetrix.com/?url=https://${d}
+
+<span class="cmd-info"># Lighthouse CLI (local):</span>
+npx lighthouse https://${d} --output html --output-path ./report.html`;
+
+  scanData.modules.tech = tech;
+}
+
+// ── THREAT INTEL MODULE ──────────────────────────────────────
+async function runThreatIntel(target) {
+  const d = target.domain;
+
+  document.getElementById('nav-threats').textContent = 'CHECK';
+  document.getElementById('threatStatus').textContent = 'VERIFY MANUALLY';
+
+  const blacklists = [
+    { name: 'Google Safe Browsing', status: 'MANUAL CHECK', cat: 'Malware/Phishing' },
+    { name: 'Spamhaus DBL', status: 'MANUAL CHECK', cat: 'Spam Domain' },
+    { name: 'SURBL', status: 'MANUAL CHECK', cat: 'URI Blacklist' },
+    { name: 'MXToolbox Blacklist', status: 'MANUAL CHECK', cat: 'Multi-list' },
+    { name: 'VirusTotal', status: 'MANUAL CHECK', cat: 'AV Engines (90+)' },
+    { name: 'URLhaus', status: 'MANUAL CHECK', cat: 'Malware URLs' },
+    { name: 'AbuseIPDB', status: 'MANUAL CHECK', cat: 'IP Abuse DB' },
+    { name: 'Sucuri SiteCheck', status: 'MANUAL CHECK', cat: 'Site Security' },
+    { name: 'IBM X-Force', status: 'MANUAL CHECK', cat: 'Threat Intel' },
+    { name: 'Phishtank', status: 'MANUAL CHECK', cat: 'Phishing DB' },
+  ];
+
+  document.getElementById('blacklistBody').innerHTML = blacklists.map(b =>
+    makeRow(b.name, `<span class="val-amber">${b.status}</span>`, b.cat)
+  ).join('');
+
+  document.getElementById('knownThreats').innerHTML =
+`<span class="cmd-info"># Note: Real-time blacklist checks require API keys or local tools.
+# Browser CORS restrictions prevent direct blacklist API calls.
+# Use the pre-built deep links in the "Intel Links" tab.</span>
+
+<span class="cmd-prompt"># Local threat checking commands:</span>
+
+<span class="cmd-info"># VirusTotal CLI (requires API key)</span>
+vt domain ${d}
+vt url https://${d}
+
+<span class="cmd-info"># Maltrail (local open-source threat detection)</span>
+python sensor.py --check-domain ${d}
+
+<span class="cmd-info"># Zeek (network traffic threat analysis)</span>
+zeek -i eth0 frameworks/intel/seen/where-do-i-check.zeek
+
+<span class="cmd-info"># MalwareURL check (CLI)</span>
+curl "https://www.virustotal.com/vtapi/v2/domain/report?apikey=YOUR_KEY&domain=${d}"
+
+<span class="cmd-prompt"># Google Safe Browsing API:</span>
+curl -X POST "https://safebrowsing.googleapis.com/v4/threatMatches:find?key=YOUR_KEY" \\
+  -H "Content-Type: application/json" \\
+  --data '{"client":{"clientId":"recon-x"},"threatInfo":{"threatTypes":["MALWARE"],"platformTypes":["ANY_PLATFORM"],"threatEntryTypes":["URL"],"threatEntries":[{"url":"https://${d}"}]}}'`;
+
+  // Threat links
+  const ip = scanData.modules?.ip?.ip || d;
+  document.getElementById('threatLinks').innerHTML = [
+    makeExtCard('VirusTotal', `https://www.virustotal.com/gui/domain/${d}`, 'Check against 90+ AV engines', '🔬'),
+    makeExtCard('URLScan.io', `https://urlscan.io/search/#domain:${d}`, 'Scan & analyze the domain', '🔍'),
+    makeExtCard('Sucuri SiteCheck', `https://sitecheck.sucuri.net/results/${d}`, 'Blacklist & malware check', '🛡'),
+    makeExtCard('ANY.RUN', `https://app.any.run/`, 'Interactive malware sandbox', '🧪'),
+    makeExtCard('URLhaus', `https://urlhaus.abuse.ch/browse.php?search=${d}`, 'Malware URL exchange', '☣'),
+    makeExtCard('AbuseIPDB', `https://www.abuseipdb.com/check/${ip}`, 'IP abuse database', '🚨'),
+    makeExtCard('IBM X-Force', `https://exchange.xforce.ibmcloud.com/url/${d}`, 'Threat intelligence', '🔐'),
+    makeExtCard('URLVoid', `https://www.urlvoid.com/scan/${d}/`, '30+ blocklist engines', '🚫'),
+    makeExtCard('Hudson Rock', `https://www.hudsonrock.com/search?domain=${d}`, 'Infostealer infection data', '🕵'),
+  ].join('');
+
+  scanData.modules.threats = { domain: d };
+}
+
+// ── MAIL CONFIG MODULE ───────────────────────────────────────
+async function runMailConfig(target) {
+  const d = target.domain;
+  let mxRecords = [], txtRecords = [], emailProvider = '—';
+
+  try {
+    const mxRes = await fetch(`https://cloudflare-dns.com/dns-query?name=${d}&type=MX`, { headers: { 'Accept': 'application/dns-json' } });
+    if (mxRes.ok) {
+      const mxData = await mxRes.json();
+      if (mxData.Answer) mxRecords = mxData.Answer;
+    }
+    const txtRes = await fetch(`https://cloudflare-dns.com/dns-query?name=${d}&type=TXT`, { headers: { 'Accept': 'application/dns-json' } });
+    if (txtRes.ok) {
+      const txtData = await txtRes.json();
+      if (txtData.Answer) txtRecords = txtData.Answer;
+    }
+  } catch(e) {}
+
+  // Detect email provider from MX records
+  const mxValues = mxRecords.map(r => r.data.toLowerCase()).join(' ');
+  if (mxValues.includes('google') || mxValues.includes('googlemail')) emailProvider = 'Google Workspace (Gmail)';
+  else if (mxValues.includes('outlook') || mxValues.includes('microsoft')) emailProvider = 'Microsoft 365 / Exchange';
+  else if (mxValues.includes('mailgun')) emailProvider = 'Mailgun';
+  else if (mxValues.includes('sendgrid')) emailProvider = 'SendGrid';
+  else if (mxValues.includes('protonmail')) emailProvider = 'ProtonMail';
+  else if (mxValues.includes('zoho')) emailProvider = 'Zoho Mail';
+  else if (mxValues.includes('fastmail')) emailProvider = 'Fastmail';
+  else if (mxRecords.length > 0) emailProvider = 'Custom / Self-hosted';
+
+  const spf = txtRecords.find(r => r.data.includes('v=spf1'));
+  const dmarc_domain = `_dmarc.${d}`;
+
+  document.getElementById('nav-email').textContent = 'DONE';
+  document.getElementById('emailGrid').innerHTML =
+    makeTile('EMAIL PROVIDER', emailProvider, 'val-cyan') +
+    makeTile('MX RECORDS', mxRecords.length > 0 ? mxRecords.length+' found' : 'None/blocked', mxRecords.length > 0 ? 'val-green' : 'val-amber') +
+    makeTile('SPF', spf ? '✓ Present' : '? Check locally', spf ? 'val-green' : 'val-amber') +
+    makeTile('DMARC', 'Check locally', 'val-muted');
+
+  document.getElementById('emailBody').innerHTML =
+    mxRecords.map(r => {
+      const prov = r.data.includes('google') ? 'Google' : r.data.includes('outlook') ? 'Microsoft' : '—';
+      return makeRow('MX', `<span class="val-cyan">${r.data}</span>`, '✓', prov);
+    }).join('') +
+    makeRow('SPF (TXT)', spf ? `<span class="val-green">${(spf.data || '').substring(0, 60)}</span>` : '<span class="val-amber">Check locally: dig TXT '+d+'</span>', spf ? '✓' : '?', 'Email Auth') +
+    makeRow('DMARC', `<a class="val-cyan" href="https://mxtoolbox.com/dmarc/${d}/" target="_blank">Check via MXToolbox →</a>`, '?', 'Policy Control') +
+    makeRow('DKIM', `<span class="val-muted">dig TXT default._domainkey.${d}</span>`, '?', 'Email Signing') +
+    makeRow('Hudson Rock', `<a class="val-cyan" href="https://www.hudsonrock.com/search?domain=${d}" target="_blank">Check infostealer data →</a>`, '?', 'Compromise Intel');
+
+  scanData.modules.email = { provider: emailProvider, mxRecords };
+}
+
+// ── CRAWLER MODULE ───────────────────────────────────────────
+async function runCrawler(target) {
+  const d = target.domain;
+  let robots = '';
+  let sitemap = '';
+  let paths = [];
+
+  // Fetch robots.txt
+  try {
+    const res = await fetch(`https://${d}/robots.txt`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      robots = await res.text();
+      // Extract disallowed paths
+      robots.split('\n').forEach(line => {
+        if (line.startsWith('Disallow:') && line.includes('/')) {
+          const p = line.replace('Disallow:', '').trim();
+          if (p && p !== '/') paths.push({ path: p, status: '403/Restricted', type: 'Robots.txt Disallow', note: 'May be sensitive' });
+        }
+        if (line.startsWith('Allow:') && line.includes('/')) {
+          const p = line.replace('Allow:', '').trim();
+          if (p) paths.push({ path: p, status: '200', type: 'Robots.txt Allow', note: '—' });
+        }
+        if (line.toLowerCase().startsWith('sitemap:')) {
+          const sUrl = line.replace(/sitemap:/i, '').trim();
+          paths.push({ path: sUrl, status: '?', type: 'SITEMAP', note: 'Parse for more URLs' });
+        }
+      });
+    }
+  } catch(e) {}
+
+  // Fetch sitemap.xml
+  try {
+    const res = await fetch(`https://${d}/sitemap.xml`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) sitemap = await res.text();
+  } catch(e) {}
+
+  // Common paths to check
+  const commonPaths = ['/admin', '/login', '/api', '/api/v1', '/wp-admin', '/.env', '/config', '/backup', '/phpmyadmin', '/dashboard', '/console', '/actuator', '/.git/HEAD', '/security.txt', '/.well-known/security.txt'];
+  for (const p of commonPaths.slice(0,5)) {
+    try {
+      const res = await fetch(`https://${d}${p}`, { method: 'HEAD', signal: AbortSignal.timeout(3000) });
+      paths.push({ path: p, status: res.status, type: 'COMMON PATH', note: res.status === 200 ? '⚠ ACCESSIBLE' : '—' });
+    } catch(e) {
+      paths.push({ path: p, status: '—', type: 'COMMON PATH', note: 'CORS/Network' });
+    }
+  }
+
+  document.getElementById('nav-crawl').textContent = paths.length > 0 ? paths.length+' PATHS' : 'DONE';
+
+  document.getElementById('pathsBody').innerHTML = paths.map(p => {
+    const statusColor = p.status === 200 || p.status === '200' ? 'val-green' : p.status === 403 ? 'val-amber' : p.status === 404 ? 'val-muted' : 'val-cyan';
+    return makeRow(`<span class="val-cyan">${p.path}</span>`, `<span class="${statusColor}">${p.status}</span>`, p.type, p.note);
+  }).join('');
+
+  document.getElementById('robotsOutput').innerHTML = robots
+    ? `<span class="cmd-info"># robots.txt content for ${d}</span>\n\n${robots}`
+    : `<span class="cmd-warn">robots.txt not accessible via browser (CORS) or not found.\n\n</span><span class="cmd-prompt">$ curl https://${d}/robots.txt</span>`;
+
+  document.getElementById('sitemapOutput').innerHTML = sitemap
+    ? `<span class="cmd-info"># sitemap.xml content (first 2000 chars)</span>\n${sitemap.substring(0, 2000)}`
+    : `<span class="cmd-warn">Sitemap not found or blocked by CORS.\n\n</span><span class="cmd-prompt">$ curl https://${d}/sitemap.xml\n$ curl https://${d}/sitemap_index.xml</span>`;
+
+  document.getElementById('linkedOutput').innerHTML =
+`<span class="cmd-prompt"># Linked Pages / URL Extraction</span>
+<span class="cmd-info"># Use wget spider (non-recursive)</span>
+wget --spider -r -nd --level=2 https://${d}/ 2>&1 | grep "^--"
+
+<span class="cmd-info"># curl + grep</span>
+curl -s https://${d}/ | grep -Eo '(href|src)="[^"]*"' | grep -v "^#"
+
+<span class="cmd-info"># Python crawler (requests + BS4)</span>
+python3 -c "
+import requests
+from bs4 import BeautifulSoup
+r = requests.get('https://${d}', timeout=10)
+soup = BeautifulSoup(r.text, 'html.parser')
+for link in soup.find_all('a', href=True):
+    print(link['href'])
+"
+
+<span class="cmd-info"># Scrapy spider</span>
+scrapy crawl basic -a url=https://${d} -o links.json`;
+
+  document.getElementById('securityTxtOutput').innerHTML =
+`<span class="cmd-prompt"># Fetching security.txt</span>
+<span class="cmd-info"># Standard locations (RFC 9116):</span>
+curl https://${d}/.well-known/security.txt
+curl https://${d}/security.txt
+
+<span class="cmd-info"># Expected fields:</span>
+Contact:    Email or URL for security reports
+Expires:    Expiry date of the policy
+Encryption: PGP key URL
+Policy:     URL to security policy
+Acknowledgments: URL to hall of fame
+
+<span class="cmd-info"># Online checker:</span>
+https://securitytxt.org/validate?url=https://${d}`;
+
+  document.getElementById('crawlCmds').innerHTML =
+`<span class="cmd-prompt"># Directory & File Enumeration</span>
+<span class="cmd-info"># Gobuster (directory brute force)</span>
+gobuster dir -u https://${d} -w /usr/share/wordlists/dirb/common.txt -t 50 -x php,html,js,txt,json
+gobuster dir -u https://${d} -w /usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt -t 50
+
+<span class="cmd-info"># ffuf (fast web fuzzer)</span>
+ffuf -w /usr/share/wordlists/dirb/common.txt -u https://${d}/FUZZ -mc 200,204,301,302,307,401,403
+ffuf -w /usr/share/seclists/Discovery/Web-Content/raft-large-files.txt -u https://${d}/FUZZ -mc 200
+
+<span class="cmd-info"># feroxbuster (recursive)</span>
+feroxbuster -u https://${d} -w wordlist.txt --depth 3
+
+<span class="cmd-info"># dirsearch</span>
+python3 dirsearch.py -u https://${d} -e php,html,js,txt --deep-recursive
+
+<span class="cmd-info"># Nmap HTTP enum</span>
+nmap --script http-enum,http-userdir-enum -p80,443 ${d}
+
+<span class="cmd-prompt"># Crawl with wget</span>
+wget -r -nd -P ./crawl/ --limit-rate=50k https://${d}
+
+<span class="cmd-prompt"># Screaming Frog (GUI tool - Windows/Mac/Linux)</span>
+<span class="cmd-info"># https://www.screamingfrog.co.uk/seo-spider/</span>`;
+
+  scanData.modules.crawl = { paths, hasRobots: !!robots, hasSitemap: !!sitemap };
+}
+
+// ── TRACEROUTE MODULE ────────────────────────────────────────
+async function runTraceroute(target) {
+  const d = target.domain;
+
+  document.getElementById('tracerouteGrid').innerHTML =
+    makeTile('METHOD', 'ICMP/UDP', 'val-cyan') +
+    makeTile('MAX HOPS', '30', 'val-muted') +
+    makeTile('TARGET', d, 'val-green') +
+    makeTile('NOTE', 'Run locally', 'val-amber');
+
+  document.getElementById('tracerouteOutput').innerHTML =
+`<span class="cmd-prompt"># TRACEROUTE COMMANDS</span>
+<span class="cmd-info"># Note: Browser cannot perform raw ICMP/UDP traceroute.
+# Run these locally for actual hop data.</span>
+
+<span class="cmd-prompt"># Windows:</span>
+tracert ${d}
+tracert -d ${d}           # Without DNS resolution (faster)
+tracert -h 30 ${d}        # Max 30 hops
+
+<span class="cmd-prompt"># Linux/Mac:</span>
+traceroute ${d}
+traceroute -n ${d}         # Numeric only
+traceroute -I ${d}         # ICMP (like Windows tracert)
+traceroute -T ${d}         # TCP (port 443, bypasses some firewalls)
+mtr ${d}                   # Real-time continuous traceroute
+mtr --report --report-cycles 10 ${d}
+
+<span class="cmd-prompt"># Nmap Traceroute:</span>
+nmap --traceroute -Pn ${d}
+
+<span class="cmd-prompt"># Visual / Online Traceroute tools:</span>
+https://tools.keycdn.com/traceroute?host=${d}
+https://bgp.tools/search?q=${d}
+https://hackertarget.com/online-traceroute/
+
+<span class="cmd-info"># BGP/ASN hop analysis: https://bgp.tools/search?q=${d}
+
+Expected output format:
+  Hop  1:  192.168.1.1       1.234 ms  (Gateway)
+  Hop  2:  10.x.x.x          5.678 ms  (ISP)
+  Hop  3:  xxx.xxx.xxx.xxx  12.345 ms  (Transit)
+  ...
+  Hop N:   <target_IP>       xx.xxx ms  (Destination)</span>`;
+}
+
+// ── ARCHIVE MODULE ───────────────────────────────────────────
+async function runArchive(target) {
+  const d = target.domain;
+
+  document.getElementById('archiveLinks').innerHTML = [
+    makeExtCard('Wayback Machine', `https://web.archive.org/web/*/${d}`, 'View all historical snapshots on archive.org', '🗄'),
+    makeExtCard('Latest Archive', `https://web.archive.org/web/latest/${d}`, 'Jump to most recent archive snapshot', '📅'),
+    makeExtCard('Archive CDX API', `https://web.archive.org/cdx/search/cdx?url=${d}&output=json&limit=20`, 'Raw CDX API for programmatic access', '⚙'),
+    makeExtCard('Cached Google', `https://webcache.googleusercontent.com/search?q=cache:${d}`, 'Google cached version of the page', '🔍'),
+    makeExtCard('Archive.today', `https://archive.ph/${d}`, 'Alternative archive snapshots', '📸'),
+    makeExtCard('TimeTravel', `https://timetravel.mementoweb.org/timemap/link/${d}`, 'Web archiving Time Travel service', '⏰'),
+  ].join('');
+}
+
+// ── WEB-CHECK MODULES ────────────────────────────────────────
+function populateWebCheck(target) {
+  const d = target.domain;
+  const wc = `https://web-check.xyz/#`;
+  const modules = [
+    { name: 'Full Analysis', icon: '🌐', desc: 'Complete web-check analysis' },
+    { name: 'Archive History', icon: '🗄', desc: 'Wayback Machine snapshots' },
+    { name: 'Block List Check', icon: '🚫', desc: 'Check domain on blocklists' },
+    { name: 'Carbon Footprint', icon: '🌱', desc: 'CO2 emissions estimate' },
+    { name: 'Cookies Analysis', icon: '🍪', desc: 'Cookie inventory & security' },
+    { name: 'DNS Server', icon: '🔄', desc: 'Name server information' },
+    { name: 'DNS Records', icon: '📋', desc: 'Full DNS record set' },
+    { name: 'DNSSEC', icon: '🔏', desc: 'DNSSEC validation status' },
+    { name: 'Site Features', icon: '⚙', desc: 'CMS, ads, analytics detected' },
+    { name: 'Firewall Type', icon: '🔥', desc: 'WAF/firewall detection' },
+    { name: 'IP Address', icon: '◈', desc: 'IP + geolocation details' },
+    { name: 'HTTP Headers', icon: '▦', desc: 'All response headers' },
+    { name: 'HSTS Check', icon: '🔒', desc: 'HSTS configuration check' },
+    { name: 'HTTP Security', icon: '🛡', desc: 'Security header grades' },
+    { name: 'Linked Pages', icon: '🔗', desc: 'All discovered page links' },
+    { name: 'Mail Config', icon: '✉', desc: 'MX, SPF, DMARC, DKIM' },
+    { name: 'Open Ports', icon: '▣', desc: 'Common open ports' },
+    { name: 'Quality Check', icon: '✓', desc: 'Overall quality score' },
+    { name: 'Global Rank', icon: '📊', desc: 'Alexa/traffic rank' },
+    { name: 'Redirects', icon: '↩', desc: 'HTTP redirect chain' },
+    { name: 'Robots.txt', icon: '🤖', desc: 'Parsed robots.txt' },
+    { name: 'Screenshot', icon: '📸', desc: 'Live page screenshot' },
+    { name: 'Security.txt', icon: '📄', desc: 'Security contact info' },
+    { name: 'Sitemap', icon: '🗺', desc: 'XML sitemap contents' },
+    { name: 'Social Tags', icon: '📲', desc: 'OG + Twitter card tags' },
+    { name: 'SSL Certificate', icon: '🔐', desc: 'Certificate details & grade' },
+    { name: 'Uptime Status', icon: '⬆', desc: 'Availability monitoring' },
+    { name: 'Tech Stack', icon: '🧱', desc: 'Detected technologies' },
+    { name: 'Known Threats', icon: '⚠', desc: 'Threat intelligence data' },
+    { name: 'TLS Version', icon: '🔑', desc: 'TLS version support' },
+    { name: 'Trace Route', icon: '↪', desc: 'Network path tracing' },
+    { name: 'TXT Records', icon: '📝', desc: 'All TXT record content' },
+    { name: 'Whois Lookup', icon: '👤', desc: 'Registration details' },
+  ];
+
+  document.getElementById('webcheckGrid').innerHTML = modules.map(m =>
+    makeExtCard(m.name, `${wc}${d}`, m.desc, m.icon)
+  ).join('');
+
+  document.getElementById('nav-wc').textContent = modules.length + ' CHK';
+}
+
+// ── EXTERNAL TOOLS ───────────────────────────────────────────
+function populateExternalTools(target) {
+  const d = target.domain;
+  const ip = scanData.modules?.ip?.ip || d;
+
+  const allTools = [
+    // Threat Intel
+    { name: 'Hudson Rock', url: `https://www.hudsonrock.com/search?domain=${d}`, desc: 'Infostealer infection data for domains and emails', icon: '🕵', cat: 'threat' },
+    { name: 'VirusTotal', url: `https://www.virustotal.com/gui/domain/${d}`, desc: 'Check URL against 90+ antivirus engines', icon: '🔬', cat: 'threat' },
+    { name: 'URLScan', url: `https://urlscan.io/search/#domain:${d}`, desc: 'Scan URL and analyze page behavior', icon: '🔍', cat: 'threat' },
+    { name: 'Sucuri SiteCheck', url: `https://sitecheck.sucuri.net/results/${d}`, desc: 'Check against blacklists and known threats', icon: '🛡', cat: 'threat' },
+    { name: 'URLVoid', url: `https://www.urlvoid.com/scan/${d}/`, desc: 'Check across 30+ blocklist engines', icon: '🚫', cat: 'threat' },
+    { name: 'URLhaus', url: `https://urlhaus.abuse.ch/browse.php?search=${d}`, desc: 'Malware URL exchange database', icon: '☣', cat: 'threat' },
+    { name: 'AbuseIPDB', url: `https://www.abuseipdb.com/check/${ip}`, desc: 'IP abuse database report', icon: '🚨', cat: 'threat' },
+    { name: 'IBM X-Force', url: `https://exchange.xforce.ibmcloud.com/url/${d}`, desc: 'Threat intelligence and analysis', icon: '🔐', cat: 'threat' },
+    { name: 'ANY.RUN', url: `https://app.any.run/`, desc: 'Interactive malware and web sandbox', icon: '🧪', cat: 'sandbox' },
+    { name: 'Cloudflare Radar', url: `https://radar.cloudflare.com/domains/domain/${d}`, desc: 'Traffic source locations via Cloudflare', icon: '☁', cat: 'threat' },
+    // DNS / Domain
+    { name: 'Domain Tools', url: `https://whois.domaintools.com/${d}`, desc: 'WHOIS lookup and domain history', icon: '📋', cat: 'dns' },
+    { name: 'NS Lookup', url: `https://www.nslookup.io/dns-records/${d}/`, desc: 'View all DNS records for domain', icon: '◉', cat: 'dns' },
+    { name: 'DNS Checker', url: `https://dnschecker.org/#A/${d}`, desc: 'Global DNS propagation check', icon: '🌍', cat: 'dns' },
+    { name: 'DNS Dumpster', url: `https://dnsdumpster.com/`, desc: 'DNS recon & domain mapping (enter ${d})', icon: '🗺', cat: 'dns' },
+    { name: 'BGP Tools', url: `https://bgp.tools/search?q=${d}`, desc: 'Real-time BGP data for ASN/Prefix/DNS', icon: '📡', cat: 'dns' },
+    { name: 'Shodan', url: `https://www.shodan.io/search?query=${d}`, desc: 'Internet-connected device search engine', icon: '🔭', cat: 'dns' },
+    { name: 'Censys', url: `https://search.censys.io/certificates?q=${d}`, desc: 'Host & certificate lookup', icon: '🔎', cat: 'dns' },
+    { name: 'MXToolbox', url: `https://mxtoolbox.com/SuperTool.aspx?action=mx%3a${d}`, desc: 'MX, Blacklist, DNS, SMTP testing', icon: '✉', cat: 'dns' },
+    { name: 'ICANN Lookup', url: `https://lookup.icann.org/en/lookup?name=${d}`, desc: 'Official ICANN WHOIS lookup', icon: '🏛', cat: 'dns' },
+    // SSL
+    { name: 'SSL Labs', url: `https://www.ssllabs.com/ssltest/analyze.html?d=${d}`, desc: 'Analyze SSL configuration and grade it', icon: '🔒', cat: 'threat' },
+    // Archive
+    { name: 'Archive.org', url: `https://web.archive.org/web/*/${d}`, desc: 'Internet Archive Wayback Machine', icon: '🗄', cat: 'dns' },
+    // Performance
+    { name: 'PageSpeed', url: `https://developers.google.com/speed/pagespeed/insights/?url=https://${d}`, desc: 'Google performance & SEO checker', icon: '⚡', cat: 'performance' },
+    { name: 'Built With', url: `https://builtwith.com/${d}`, desc: 'Full technology stack analysis', icon: '🧱', cat: 'performance' },
+    { name: 'Similar Web', url: `https://www.similarweb.com/website/${d}/`, desc: 'Traffic & engagement statistics', icon: '📊', cat: 'performance' },
+    { name: 'Blacklist Check', url: `https://blacklistchecker.com/check/${d}`, desc: 'Check domain/IP on top blacklists', icon: '📵', cat: 'threat' },
+    { name: 'Mozilla HTTP Obs.', url: `https://observatory.mozilla.org/analyze/${d}`, desc: 'HTTP security header assessment', icon: '🦊', cat: 'performance' },
+    { name: 'GTmetrix', url: `https://gtmetrix.com/?url=https://${d}`, desc: 'Page speed and performance report', icon: '🏎', cat: 'performance' },
+    { name: 'SecurityHeaders', url: `https://securityheaders.com/?q=${d}&followRedirects=on`, desc: 'Security header grade report', icon: '🛡', cat: 'performance' },
+  ];
+
+  const renderGrid = (id, filter) => {
+    const items = filter === 'all' ? allTools : allTools.filter(t => t.cat === filter);
+    document.getElementById(id).innerHTML = items.map(t =>
+      makeExtCard(t.name, t.url, t.desc, t.icon)
+    ).join('');
+  };
+
+  renderGrid('extGridAll', 'all');
+  renderGrid('extGridThreat', 'threat');
+  renderGrid('extGridDns', 'dns');
+  renderGrid('extGridPerf', 'performance');
+  renderGrid('extGridSandbox', 'sandbox');
+  document.getElementById('nav-ext').textContent = allTools.length+' TOOLS';
+}
+
+// ── SUMMARY ──────────────────────────────────────────────────
+function buildSummary(target) {
+  const d = target.domain;
+  const ts = new Date().toLocaleString();
+  const ping = scanData.modules?.ping;
+  const ip = scanData.modules?.ip;
+  const ports = scanData.modules?.ports || [];
+  const dns = scanData.modules?.dns || [];
+  const subs = scanData.modules?.subdomains || [];
+  const email = scanData.modules?.email;
+  const crawl = scanData.modules?.crawl;
+
+  const openCount = ports.filter(p => p.state === 'open').length;
+  const riskScore = Math.max(10, 100 - (openCount * 8) - (ping?.loss > 0 ? 10 : 0));
+
+  document.getElementById('scoreRing').textContent = riskScore;
+  document.getElementById('scoreRing').className = riskScore >= 70 ? 'score-ring' : riskScore >= 40 ? 'score-ring warn' : 'score-ring danger';
+  document.getElementById('scoreLabel').textContent = riskScore >= 70 ? 'LOW RISK' : riskScore >= 40 ? 'MEDIUM RISK' : 'HIGH RISK';
+  document.getElementById('scoreLabel').style.color = riskScore >= 70 ? 'var(--neon-green)' : riskScore >= 40 ? 'var(--neon-amber)' : 'var(--neon-red)';
+
+  const ind = document.getElementById('threatIndicator');
+  if (ind) ind.style.left = `${100 - riskScore}%`;
+
+  document.getElementById('summaryContent').innerHTML = `
+  <div class="info-grid">
+    ${makeTile('TARGET', d, 'val-green')}
+    ${makeTile('SCAN TIME', ts)}
+    ${makeTile('IP ADDRESS', ip?.ip || '—', 'val-cyan')}
+    ${makeTile('LOCATION', ip ? `${ip.city}, ${ip.country}` : '—')}
+    ${makeTile('ORG / ASN', ip?.org || '—', 'val-amber')}
+    ${makeTile('REACHABLE', ping?.reachable ? 'YES' : 'CHECK', ping?.reachable ? 'val-green' : 'val-amber')}
+    ${makeTile('AVG LATENCY', ping?.avgRTT ? ping.avgRTT+'ms' : '—', 'val-cyan')}
+    ${makeTile('OPEN PORTS', openCount+' detected', openCount > 5 ? 'val-amber' : 'val-green')}
+    ${makeTile('DNS RECORDS', dns.length+' found', 'val-cyan')}
+    ${makeTile('SUBDOMAINS', subs.length+' found', 'val-cyan')}
+    ${makeTile('EMAIL PROVIDER', email?.provider || '—', 'val-muted')}
+    ${makeTile('RISK SCORE', riskScore+'/100', riskScore>=70?'val-green':riskScore>=40?'val-amber':'val-red')}
+  </div>
+  <div class="alert alert-warn" style="margin-top:12px;">
+    <span class="alert-icon">⚠</span>
+    <span>This is a browser-based recon tool. For complete results, run the generated commands locally using Nmap, dig, testssl.sh, subfinder, and other CLI tools referenced in each module.</span>
+  </div>`;
+
+  scanData.summary = { target: d, riskScore, timestamp: ts, ipInfo: ip, openPorts: openCount };
+}
+
+// ── EXPORT ───────────────────────────────────────────────────
+function exportReport() {
+  const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>RECON-X Report: ${currentTarget}</title>
+<style>body{font-family:monospace;background:#020810;color:#c8e8ff;padding:2rem;}h1{color:#00ff88;}table{border-collapse:collapse;width:100%;}td,th{border:1px solid #1a2d4a;padding:6px;}pre{background:#060e1a;padding:1rem;overflow-x:auto;white-space:pre-wrap;}</style>
+</head><body>
+<h1>RECON-X Scan Report</h1>
+<p>Target: <strong>${currentTarget}</strong> | Generated: ${new Date().toISOString()}</p>
+<pre>${JSON.stringify(scanData, null, 2)}</pre>
+</body></html>`;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `recon-x_${currentTarget}_${Date.now()}.html`;
+  a.click();
+  showToast('HTML report exported!');
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(scanData, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `recon-x_${currentTarget}_${Date.now()}.json`;
+  a.click();
+  showToast('JSON exported!');
+}
+
+// ── KEYBOARD SHORTCUT ────────────────────────────────────────
+document.getElementById('targetInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') startRecon();
+});
+
+// ── DEMO TARGETS ─────────────────────────────────────────────
+document.querySelector('.filter-chip').onclick = function() {
+  this.parentElement.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  this.classList.add('active');
+  document.querySelectorAll('.panel[data-category]').forEach(p => p.style.display='');
+};
+</script>
+</body>
+</html>
